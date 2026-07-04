@@ -2,236 +2,287 @@
 session_start();
 include("../config/db.php");
 
-// =====================
-// PROTECTION
-// =====================  
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit();
 }
 
-if (
-    !isset($_SESSION['role']) ||
-    ($_SESSION['role'] !== 'suggester' && $_SESSION['role'] !== 'user')
-) {
-    header("Location: ../login.php");
-    exit();
-}
-
-// Logged-in user ID
 $user_id = $_SESSION['user_id'];
 
 $message = "";
 $messageType = "";
 
-// =====================
-// INSERT SUGGESTION
-// =====================
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $title = trim($_POST['title']);
-    $description = trim($_POST['description']);
-    $category = $_POST['category'];
+    $title = trim($_POST['title'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $category = intval($_POST['category'] ?? 0);
 
-    if (!empty($title) && !empty($description) && !empty($category)) {
+    if ($title === '' || $description === '' || $category === 0) {
+        $message = "Please fill all required fields!";
+        $messageType = "warning";
+    } else {
 
         $stmt = $conn->prepare("
-            INSERT INTO suggestions
-            (user_id, category_id, title, message, status)
+            INSERT INTO suggestions (user_id, category_id, title, message, status)
             VALUES (?, ?, ?, ?, 'pending')
         ");
 
-        $stmt->bind_param(
-            "iiss",
-            $user_id,
-            $category,
-            $title,
-            $description
-        );
+        $stmt->bind_param("iiss", $user_id, $category, $title, $description);
+        $stmt->execute();
 
-        if ($stmt->execute()) {
+        $suggestion_id = $stmt->insert_id;
+        $stmt->close();
 
-            $message = "Suggestion submitted successfully!";
-            $messageType = "success";
+        if (!empty($_FILES['attachment']['name'])) {
 
-            header("refresh:2;url=suggester_dashboard.php");
+            $allowed = ['jpg','jpeg','png','pdf','docx'];
 
-        } else {
-            $message = "Error submitting suggestion!";
-            $messageType = "danger";
+            $name = $_FILES['attachment']['name'];
+            $tmp  = $_FILES['attachment']['tmp_name'];
+            $size = $_FILES['attachment']['size'];
+
+            $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+
+            if (in_array($ext, $allowed) && $size <= 2*1024*1024) {
+
+                $newName = uniqid("file_", true).".".$ext;
+
+                $dir = "../uploads/";
+                if (!is_dir($dir)) mkdir($dir, 0777, true);
+
+                move_uploaded_file($tmp, $dir.$newName);
+
+                $dbPath = "uploads/".$newName;
+
+                $att = $conn->prepare("
+                    INSERT INTO attachments (suggestion_id, file_name, file_path, file_type)
+                    VALUES (?, ?, ?, ?)
+                ");
+
+                $att->bind_param("isss", $suggestion_id, $name, $dbPath, $ext);
+                $att->execute();
+                $att->close();
+            }
         }
 
-    } else {
-        $message = "All fields are required!";
-        $messageType = "warning";
+        $message = "Suggestion submitted successfully!";
+        $messageType = "success";
     }
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
 <title>Submit Suggestion</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
+<style>
 
-/* =======================
-   WHITE MODE CLEAN DESIGN
-======================= */
-
+/* ================= GLOBAL THEME ================= */
 body{
     margin:0;
-    font-family:'Segoe UI',sans-serif;
-    background:#ffffff;
-    color:#111;
+    font-family:'Segoe UI', sans-serif;
+    background:#f5f7fb;
+    color:#111827;
 }
 
+/* ================= TOPBAR ================= */
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:60px;
+    background:#111827;
+    border-bottom:1px solid #1f2937;
+    z-index:9999;
+    color:#fff;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar{
+    position:fixed;
+    top:60px;
+    left:0;
+    width:250px;
+    height:calc(100vh - 60px);
+    background:#111827;
+    border-right:1px solid #1f2937;
+    z-index:9998;
+    color:#fff;
+}
+
+/* ================= CONTENT ================= */
 .content{
-    margin-left:230px;
-    padding:20px;
+    margin-left:250px;
+    padding:120px 130px 150px;
 }
 
-.card-box{
+/* ================= CENTER WRAPPER ================= */
+.wrapper{
+    max-width:650px;
+    margin:auto;
+}
+
+/* ================= CARD ================= */
+.card{
     background:#ffffff;
-    border-radius:18px;
-    padding:25px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.06);
-    border:1px solid #f1f1f1;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.06);
+    overflow:hidden;
 }
 
-.form-control{
+/* HEADER (SIDEBAR ACCENT STYLE) */
+.card-header{
+    background:#1e3a8a; /* blue accent like sidebar active */
+    color:#fff;
+    padding:16px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+/* BODY */
+.card-body{
+    padding:22px;
+}
+
+/* LABEL */
+label{
+    display:block;
+    margin-bottom:6px;
+    font-size:13px;
+    font-weight:600;
+    color:#374151;
+}
+
+/* INPUTS */
+input, select, textarea{
+    width:100%;
     padding:12px;
     border-radius:10px;
-    border:1px solid #e5e7eb;
+    border:1px solid #d1d5db;
+    margin-bottom:15px;
     background:#fff;
-    color:#111;
+    font-size:14px;
+    transition:0.2s;
 }
 
-.form-control:focus{
-    border-color:#9ca3af;
-    box-shadow:0 0 0 3px rgba(156,163,175,0.15);
+/* FOCUS STATE (MATCH SIDEBAR BLUE) */
+input:focus, select:focus, textarea:focus{
+    border-color:#2563eb;
+    box-shadow:0 0 0 3px rgba(37,99,235,0.15);
     outline:none;
 }
 
-.btn-primary{
+/* BUTTON (PRIMARY SIDEBAR BLUE) */
+button{
+    width:100%;
     padding:12px;
-    border-radius:10px;
-    background:#111827;
     border:none;
-    color:white;
-}
-
-.btn-primary:hover{
-    background:#000;
-}
-
-.page-title{
-    margin-bottom:15px;
-    color:#111827;
+    border-radius:10px;
+    background:#2563eb;
+    color:#fff;
     font-weight:600;
+    cursor:pointer;
+    transition:0.2s;
 }
 
-.form-label{
-    color:#374151;
-    font-weight:500;
+/* BUTTON HOVER (DARK SIDEBAR STYLE) */
+button:hover{
+    background:#1f2937;
 }
 
-.alert-success{
-    background:#ecfdf5;
-    color:#065f46;
-    border:1px solid #a7f3d0;
+/* ALERT BOXES */
+.alert{
+    padding:10px;
+    border-radius:10px;
+    margin-bottom:15px;
+    font-size:14px;
 }
 
-.alert-danger{
-    background:#fef2f2;
-    color:#991b1b;
-    border:1px solid #fecaca;
-}
+/* STATUS COLORS */
+.success{background:#dcfce7;color:#166534;}
+.warning{background:#fef3c7;color:#92400e;}
+.danger{background:#fee2e2;color:#991b1b;}
 
-.alert-warning{
-    background:#fffbeb;
-    color:#92400e;
-    border:1px solid #fde68a;
+/* OPTIONAL MODERN TOUCH */
+input, select, textarea, button{
+    box-shadow:0 2px 6px rgba(0,0,0,0.04);
 }
 
 </style>
-
 </head>
 
 <body>
 
-<?php include("../sider/sider.php"); ?>
 <?php include("../toper/toper.php"); ?>
+<?php include("../sider/sider.php"); ?>
 
 <div class="content">
 
-<div class="card-box">
+    <div class="wrapper">
 
-<h4 class="page-title">
-<i class="fas fa-paper-plane"></i>
-Submit Suggestion
-</h4>
+        <div class="card">
 
-<?php if (!empty($message)) { ?>
+            <div class="card-header">
+                <i class="fa fa-paper-plane"></i>
+                Submit Suggestion
+            </div>
 
-<div class="alert alert-<?php echo $messageType; ?> text-center">
-<?php echo $message; ?>
-</div>
+            <div class="card-body">
 
-<?php } ?>
+                <?php if($message): ?>
+                    <div class="alert <?= $messageType ?>">
+                        <?= $message ?>
+                    </div>
+                <?php endif; ?>
 
-<form method="POST">
+                <form method="POST" enctype="multipart/form-data">
 
-    <!-- ===================== -->
-    <!-- CATEGORY DROPDOWN -->
-    <!-- ===================== -->
-    <div class="mb-3">
-        <label class="form-label">Category</label>
+                    <label>Category</label>
+                    <select name="category" required>
+                        <option value="">Select category</option>
+                        <?php
+                        $cat = $conn->query("SELECT * FROM categories");
+                        while($c = $cat->fetch_assoc()){
+                        ?>
+                        <option value="<?= $c['category_id'] ?>">
+                            <?= htmlspecialchars($c['category_name']) ?>
+                        </option>
+                        <?php } ?>
+                    </select>
 
-        <select name="category" class="form-control" required>
-            <option value="">Select Category</option>
-           
+                    <label>Title</label>
+                    <input type="text" name="title" required>
 
-            <?php
-            $cat = $conn->prepare("SELECT category_id, category_name FROM categories ORDER BY category_name ASC");
-            $cat->execute();
-            $result = $cat->get_result();
+                    <label>Description</label>
+                    <textarea name="description" rows="4" required></textarea>
 
-            while($c = $result->fetch_assoc()){
-            ?>
-                <option value="<?php echo $c['category_id']; ?>">
-                    <?php echo htmlspecialchars($c['category_name']); ?>
-                </option>
-            <?php } ?>
+                    <label>Attachment (optional)</label>
+                    <input type="file" name="attachment">
 
-        </select>
+                    <button type="submit">
+                        <i class="fa fa-paper-plane"></i> Submit
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Title</label>
-        <input type="text" name="title" class="form-control"
-               placeholder="Enter suggestion title" required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Description</label>
-        <textarea name="description" rows="5" class="form-control"
-                  placeholder="Write your suggestion..." required></textarea>
-    </div>
-
-    <button type="submit" class="btn btn-primary w-100">
-        <i class="fas fa-paper-plane"></i>
-        Submit Suggestion
-    </button>
-
-</form>
-
-</div>
 
 </div>
 

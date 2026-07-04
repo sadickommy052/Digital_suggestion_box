@@ -6,13 +6,11 @@
 
 <title>Digital Suggestion Box System</title>
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
 
-/* =========================
-   BASE STYLE
-========================= */
+/* ================= GLOBAL ================= */
 
 *{
     margin:0;
@@ -22,197 +20,150 @@
 }
 
 body{
-    background:#f8fafc;
-    color:#1e293b;
+    background:#f4f6f9;
+    color:#111827;
 }
 
-/* =========================
-   NAVBAR (PROFESSIONAL)
-========================= */
+/* ================= NAV ================= */
 
 nav{
-    background:#ffffff;
+    background:#111827;
+    color:#fff;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:18px 60px;
-    box-shadow:0 2px 20px rgba(0,0,0,.08);
-    position:sticky;
-    top:0;
-    z-index:1000;
+    padding:16px 50px;
 }
 
 .logo{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    font-size:24px;
-    font-weight:700;
-    color:#2563eb;
+    font-size:22px;
+    font-weight:bold;
 }
 
-.nav-links{
-    display:flex;
-    align-items:center;
-    gap:25px;
+.logo i{
+    color:#60a5fa;
+    margin-right:8px;
 }
 
-.nav-links a{
+.nav-btns{
+    display:flex;
+    gap:12px;
+}
+
+.nav-btns a{
     text-decoration:none;
-    color:#475569;
+    padding:10px 20px;
+    border-radius:8px;
     font-weight:600;
-    transition:.3s;
 }
 
-.nav-links a:hover{
-    color:#2563eb;
+.login{
+    border:1px solid #fff;
+    color:#fff;
 }
 
-.login-btn{
-    border:2px solid #2563eb;
-    padding:10px 18px;
-    border-radius:8px;
+.login:hover{
+    background:#fff;
+    color:#111827;
 }
 
-.login-btn:hover{
-    background:#2563eb;
-    color:white;
+.register{
+    background:#1e3a8a;
+    color:#fff;
 }
 
-.register-btn{
-    background:#2563eb;
-    color:white;
-    padding:10px 18px;
-    border-radius:8px;
+.register:hover{
+    background:#1e40af;
 }
 
-.register-btn:hover{
-    background:#1d4ed8;
-}
-
-/* =========================
-   HERO SECTION
-========================= */
+/* ================= HERO ================= */
 
 .hero{
-    padding:100px 40px;
-    text-align:center;
-    background:linear-gradient(135deg,#eff6ff,#ffffff);
+    max-width:1100px;
+    margin:50px auto;
+    display:flex;
+    gap:30px;
+    align-items:center;
+    justify-content:space-between;
+    padding:40px;
 }
 
-.hero h1{
-    font-size:52px;
+/* LEFT TEXT */
+.hero-left{
+    flex:1;
+}
+
+.hero-left h1{
+    font-size:42px;
     margin-bottom:15px;
 }
 
-.hero p{
-    max-width:750px;
-    margin:auto;
-    font-size:18px;
-    line-height:1.7;
-    color:#64748b;
+/* 🔥 BOLD PARAGRAPHS */
+.hero-left p{
+    color:#111827;
+    line-height:1.8;
+    margin-bottom:12px;
+    font-size:16px;
+    font-weight:bold;
 }
 
-.btn-area{
-    margin-top:30px;
-}
-
-.btn{
+/* BUTTON */
+.hero-left a{
     display:inline-block;
-    padding:14px 28px;
-    border-radius:10px;
+    background:#111827;
+    color:#fff;
+    padding:12px 25px;
+    border-radius:8px;
     text-decoration:none;
-    font-weight:bold;
-    margin:10px;
+    margin-top:10px;
 }
 
-.btn-primary{
-    background:#2563eb;
-    color:white;
+.hero-left a:hover{
+    background:#1f2937;
 }
 
-.btn-primary:hover{
-    background:#1d4ed8;
+/* RIGHT IMAGE (RESIZED FIX) */
+.hero-right{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 
-.btn-outline{
-    border:2px solid #2563eb;
-    color:#2563eb;
+.hero-right img{
+    width:100%;
+    max-width:250px;   /* 🔥 resized smaller */
+    height:auto;
+    border-radius:18px;
+    box-shadow:0 15px 30px rgba(0,0,0,0.18);
+    object-fit:cover;
+  
 }
 
-.btn-outline:hover{
-    background:#2563eb;
-    color:white;
-}
-
-/* =========================
-   FEATURES
-========================= */
-
-.section-title{
-    text-align:center;
-    margin:60px 0 40px;
-}
-
-.section-title h2{
-    font-size:35px;
-}
-
-.features{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:25px;
-    padding:0 60px 60px;
-}
-
-.card{
-    background:white;
-    padding:30px;
-    border-radius:15px;
-    text-align:center;
-    box-shadow:0 5px 20px rgba(0,0,0,.06);
-}
-
-.card i{
-    font-size:40px;
-    color:#2563eb;
-    margin-bottom:15px;
-}
-
-/* =========================
-   HOW IT WORKS
-========================= */
-
-.steps{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:25px;
-    padding:0 60px 60px;
-}
-
-.step{
-    background:white;
-    padding:25px;
-    border-radius:15px;
-    box-shadow:0 5px 20px rgba(0,0,0,.06);
-}
-
-.step span{
-    font-size:28px;
-    font-weight:bold;
-    color:#2563eb;
-}
-
-/* =========================
-   FOOTER
-========================= */
+/* ================= FOOTER ================= */
 
 footer{
-    background:#0f172a;
-    color:white;
+    margin-top:100px;
+    background:#111827;
+    color:#fff;
     text-align:center;
-    padding:25px;
-    margin-top:40px;
+    padding:10px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:900px){
+
+    nav{
+        flex-direction:column;
+        gap:10px;
+    }
+
+    .hero{
+        flex-direction:column;
+        text-align:center;
+    }
+
 }
 
 </style>
@@ -221,137 +172,46 @@ footer{
 
 <body>
 
-<!-- ================= NAVBAR ================= -->
+<!-- ================= NAV ================= -->
 
 <nav>
 
-    <div class="logo">
-        <i class="fas fa-lightbulb"></i>
-        Digital Suggestion Box
-    </div>
-
-    <div class="nav-links">
-
-        <a href="index.php" class="active">Home</a>
-        <a href="#features">Features</a>
-        <a href="#how">How It Works</a>
-
-        <a href="login.php" class="login-btn">Login</a>
-
-    </div>
+<div class="logo">
+<i class="fas fa-lightbulb"></i> Digital Suggestion Box
+</div>
 
 </nav>
 
 <!-- ================= HERO ================= -->
+
 <section class="hero">
 
-    <div class="hero-container">
+<div class="hero-left">
 
-        <div class="hero-text">
+<h1>Digital Suggestion box system</h1>
 
-            <h1>Digital Suggestion Box System</h1>
+<p>
+A Digital Suggestion Box System is a web-based platform that allows users to easily submit ideas, feedback, and complaints in a secure and organized way. Instead of using physical suggestion boxes, everything is done online, making it faster and more efficient for both users and administrators. The system helps organizations collect opinions, review suggestions, and improve services through transparent communication and better decision-making.
+</p>
 
-            <p>
-                A secure platform that allows users to submit suggestions, feedback,
-                complaints and ideas. Organizations can easily manage feedback and improve services.
-            </p><br><br>
 
-           
+<a href="login.php">Get Started</a>
 
-        </div>
-
-        <div class="hero-image">
-
-            <img src="suggestion.jpeg" alt="Suggestion System">
-
-        </div>
-         <div class="btn-area">
-                <a href="register.php" class="btn btn-primary">Get Started</a>
-                <a href="login.php" class= "btn btn-primary">submit suggestion</a>
-            </div>
-
-    </div>
-
-</section>
-<!-- ================= FEATURES ================= -->
-
-<div class="section-title" id="features">
-    <h2>Key Features</h2>
 </div>
 
-<section class="features">
+<div class="hero-right">
 
-    <div class="card">
-        <i class="fas fa-lightbulb"></i>
-        <h3>Smart Suggestions</h3>
-        <p>Submit ideas easily anytime.</p>
-    </div>
+<!-- IMAGE -->
+<img src="ideas.jpeg" alt="Suggestion Box Image">
 
-    <div class="card">
-        <i class="fas fa-user-shield"></i>
-        <h3>Secure System</h3>
-        <p>Role-based access control.</p>
-    </div>
-
-    <div class="card">
-        <i class="fas fa-chart-line"></i>
-        <h3>Analytics</h3>
-        <p>Track and monitor feedback.</p>
-    </div>
-
-    <div class="card">
-        <i class="fas fa-cogs"></i>
-        <h3>Admin Control</h3>
-        <p>Manage users and system settings.</p>
-    </div>
-
-</section>
-
-<!-- ================= HOW IT WORKS ================= -->
-
-<div class="section-title" id="how">
-    <h2>How It Works</h2>
 </div>
-
-<section class="steps">
-
-    <div class="step">
-        <span>1</span>
-        <h3>Create Account</h3>
-        <p>Register as a user or admin.</p>
-    </div>
-
-    <div class="step">
-        <span>2</span>
-        <h3>Submit Feedback</h3>
-        <p>Send suggestions easily.</p>
-    </div>
-
-    <div class="step">
-        <span>3</span>
-        <h3>Admin Review</h3>
-        <p>Suggestions are reviewed.</p>
-    </div>
-
-    <div class="step">
-        <span>4</span>
-        <h3>Improvement</h3>
-        <p>System is improved continuously.</p>
-    </div>
 
 </section>
 
 <!-- ================= FOOTER ================= -->
 
 <footer>
-
-    <h3>Digital Suggestion Box System</h3>
-    <p>Built for better communication between users and organizations</p>
-
-    <br>
-
-    &copy; <?php echo date("Y"); ?> All Rights Reserved
-
+© 2026 Digital Suggestion Box System
 </footer>
 
 </body>

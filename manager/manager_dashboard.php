@@ -2,93 +2,101 @@
 session_start();
 include("../config/db.php");
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// =====================
-// AUTH CHECK
-// =====================
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'suggestion_manager') {
+if(!isset($_SESSION['user_id']) || ($_SESSION['role']??'')!='suggestion_manager'){
     header("Location: ../login.php");
     exit();
 }
 
-$full_name = $_SESSION['full_name'] ?? 'Manager';
+$user_id_session = (int)$_SESSION['user_id'];
 
-// =====================
-// ACTION HANDLER (APPROVE / REJECT / DELETE)
-// =====================
+/* GET USER INFO (NAME + PROFILE PICTURE FIXED) */
+$user=$conn->prepare("
+SELECT full_name, profile_picture 
+FROM users 
+WHERE user_id=?
+");
+$user->bind_param("i",$user_id_session);
+$user->execute();
+$name=$user->get_result()->fetch_assoc();
 
-// APPROVE
-if (isset($_GET['approve'])) {
-    $id = intval($_GET['approve']);
+$full_name = $name['full_name'] ?? "User";
+$profile_picture = $name['profile_picture'] ?? "";
 
-    $stmt = $conn->prepare("UPDATE suggestions SET status='approved' WHERE suggestion_id=?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
+/* ================= ACTIONS ================= */
+if(isset($_GET['approve']) || isset($_GET['reject']) || isset($_GET['delete']) || isset($_GET['implement'])){
 
-    header("Location: manager_dashboard.php");
-    exit();
+$id=(int)($_GET['approve'] ?? $_GET['reject'] ?? $_GET['delete'] ?? $_GET['implement']);
+
+$q=$conn->prepare("SELECT user_id FROM suggestions WHERE suggestion_id=?");
+$q->bind_param("i",$id);
+$q->execute();
+
+$owner=$q->get_result()->fetch_assoc();
+
+if($owner){
+
+$user_id=$owner['user_id'];
+
+if(isset($_GET['approve'])){
+$conn->query("UPDATE suggestions SET status='approved' WHERE suggestion_id=$id");
+$title="Suggestion Approved";
+$msg="Your suggestion has been approved.";
+$type="suggestion_approved";
+}
+elseif(isset($_GET['reject'])){
+$conn->query("UPDATE suggestions SET status='rejected' WHERE suggestion_id=$id");
+$title="Suggestion Rejected";
+$msg="Your suggestion has been rejected.";
+$type="suggestion_rejected";
+}
+elseif(isset($_GET['implement'])){
+$conn->query("UPDATE suggestions SET status='implemented' WHERE suggestion_id=$id");
+$title="Suggestion Implemented";
+$msg="Your suggestion has been implemented.";
+$type="suggestion_implemented";
+}
+else{
+$conn->query("DELETE FROM suggestions WHERE suggestion_id=$id");
+$title="Suggestion Deleted";
+$msg="Your suggestion was deleted.";
+$type="suggestion_deleted";
 }
 
-// REJECT
-if (isset($_GET['reject'])) {
-    $id = intval($_GET['reject']);
-
-    $stmt = $conn->prepare("UPDATE suggestions SET status='rejected' WHERE suggestion_id=?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-
-    header("Location: manager_dashboard.php");
-    exit();
+$n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
+$n->bind_param("isss",$user_id,$title,$msg,$type);
+$n->execute();
 }
 
-// DELETE
-if (isset($_GET['delete'])) {
-    $id = intval($_GET['delete']);
-
-    $stmt = $conn->prepare("DELETE FROM suggestions WHERE suggestion_id=?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-
-    header("Location: manager_dashboard.php");
-    exit();
+header("Location: manager_dashboard.php");
+exit();
 }
 
-// REPLY
-if (isset($_POST['reply_submit'])) {
-    $id = intval($_POST['suggestion_id']);
-    $reply = trim($_POST['reply']);
+/* ================= STATS ================= */
+$total=$conn->query("SELECT COUNT(*) c FROM suggestions")->fetch_assoc()['c'];
+$pending=$conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='pending'")->fetch_assoc()['c'];
+$approved=$conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='approved'")->fetch_assoc()['c'];
+$rejected=$conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='rejected'")->fetch_assoc()['c'];
+$implemented=$conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='implemented'")->fetch_assoc()['c'];
 
-    $stmt = $conn->prepare("UPDATE suggestions SET reply=? WHERE suggestion_id=?");
-    $stmt->bind_param("si", $reply, $id);
-    $stmt->execute();
+/* ================= RECENT ================= */
+$recent=$conn->query("
+SELECT 
+    s.*,
+    u.full_name,
+    c.category_name,
 
-    header("Location: manager_dashboard.php");
-    exit();
-}
+    SUM(CASE WHEN v.response='agree' THEN 1 ELSE 0 END) AS total_agree,
+    SUM(CASE WHEN v.response='disagree' THEN 1 ELSE 0 END) AS total_disagree
 
-// =====================
-// FILTER
-// =====================
-$status = $_GET['status'] ?? '';
+FROM suggestions s
+JOIN users u ON u.user_id = s.user_id
+LEFT JOIN categories c ON c.category_id = s.category_id
+LEFT JOIN votes v ON v.suggestion_id = s.suggestion_id
 
-if ($status != '') {
-    $stmt = $conn->prepare("SELECT * FROM suggestions WHERE status=? ORDER BY suggestion_id DESC");
-    $stmt->bind_param("s", $status);
-    $stmt->execute();
-    $suggestions = $stmt->get_result();
-} else {
-    $suggestions = $conn->query("SELECT * FROM suggestions ORDER BY suggestion_id DESC");
-}
-
-// =====================
-// STATS
-// =====================
-$total = $conn->query("SELECT COUNT(*) as total FROM suggestions")->fetch_assoc()['total'] ?? 0;
-$pending = $conn->query("SELECT COUNT(*) as total FROM suggestions WHERE status='pending'")->fetch_assoc()['total'] ?? 0;
-$approved = $conn->query("SELECT COUNT(*) as total FROM suggestions WHERE status='approved'")->fetch_assoc()['total'] ?? 0;
-$rejected = $conn->query("SELECT COUNT(*) as total FROM suggestions WHERE status='rejected'")->fetch_assoc()['total'] ?? 0;
+GROUP BY s.suggestion_id
+ORDER BY s.suggestion_id DESC
+LIMIT 10
+");
 ?>
 
 <!DOCTYPE html>
@@ -96,14 +104,95 @@ $rejected = $conn->query("SELECT COUNT(*) as total FROM suggestions WHERE status
 <head>
 <title>Manager Dashboard</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-body{background:#f5f7fb;font-family:Segoe UI;}
-.content{margin-left:220px;padding:25px;}
-.card{border:none;border-radius:15px;padding:20px;box-shadow:0 5px 18px rgba(0,0,0,.08);margin-bottom:18px;}
-</style>
+body{
+margin:0;
+font-family:Segoe UI;
+background:#f4f6fb;
+}
 
+.content{
+margin-left:200px;
+padding:100px;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:18px;
+margin-bottom:25px;
+}
+
+.card{
+background:white;
+padding:18px;
+border-radius:14px;
+text-align:center;
+box-shadow:0 4px 15px rgba(0,0,0,0.08);
+}
+
+.card p{font-size:26px;font-weight:bold;margin:10px 0 0;}
+
+.card.total{border-left:5px solid #111827;}
+.card.pending{border-left:5px solid #f59e0b;}
+.card.approved{border-left:5px solid #22c55e;}
+.card.rejected{border-left:5px solid #ef4444;}
+.card.implemented{border-left:5px solid #3b82f6;}
+
+.box{
+background:white;
+padding:22px;
+border-radius:14px;
+margin-top:20px;
+box-shadow:0 4px 15px rgba(0,0,0,0.08);
+}
+
+.recent-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:15px;
+}
+
+.recent-card{
+background:#fff;
+padding:15px;
+border-radius:12px;
+box-shadow:0 3px 10px rgba(0,0,0,0.06);
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.preview{
+width:100%;
+height:120px;
+object-fit:cover;
+border-radius:8px;
+}
+
+.status{
+padding:6px 10px;
+border-radius:999px;
+font-size:12px;
+font-weight:600;
+display:inline-block;
+}
+
+.approved{background:#dcfce7;color:#166534;}
+.pending{background:#fef3c7;color:#92400e;}
+.rejected{background:#fee2e2;color:#991b1b;}
+.implemented{background:#dbeafe;color:#1e40af;}
+
+.vote-box{
+display:flex;
+gap:15px;
+font-size:13px;
+color:#374151;
+align-items:center;
+}
+</style>
 </head>
 
 <body>
@@ -113,110 +202,49 @@ body{background:#f5f7fb;font-family:Segoe UI;}
 
 <div class="content">
 
-<!-- HEADER -->
-<div class="card">
-<h4>📊 Suggestion Manager Dashboard</h4>
-<p>Welcome, <?= htmlspecialchars($full_name) ?></p>
-</div>
-
 <!-- STATS -->
-<div class="row">
+<div class="stats">
+<div class="card"><h4>Total</h4><p><?=$total?></p></div>
+<div class="card"><h4>Pending</h4><p><?=$pending?></p></div>
+<div class="card"><h4>Approved</h4><p><?=$approved?></p></div>
+<div class="card"><h4>Rejected</h4><p><?=$rejected?></p></div>
+<div class="card"><h4>Implemented</h4><p><?=$implemented?></p></div>
+</div>
 
-<div class="col-md-3"><div class="card text-center"><h6>Total</h6><h3><?= $total ?></h3></div></div>
-<div class="col-md-3"><div class="card text-center"><h6>Pending</h6><h3><?= $pending ?></h3></div></div>
-<div class="col-md-3"><div class="card text-center"><h6>Approved</h6><h3><?= $approved ?></h3></div></div>
-<div class="col-md-3"><div class="card text-center"><h6>Rejected</h6><h3><?= $rejected ?></h3></div></div>
+<!-- RECENT -->
+<div class="box">
+<h3>Recent Suggestions</h3>
+
+<div class="recent-grid">
+
+<?php while($r=$recent->fetch_assoc()): ?>
+
+<div class="recent-card">
+
+<strong><?=htmlspecialchars($r['full_name'])?></strong>
+
+<div><?=htmlspecialchars($r['category_name'] ?? 'No category')?></div>
+
+<div><?=htmlspecialchars($r['message'])?></div>
+
+<div class="vote-box">
+    <span><i class="fas fa-thumbs-up"></i> <?=$r['total_agree']?></span>
+    <span><i class="fas fa-thumbs-down"></i> <?=$r['total_disagree']?></span>
+</div>
+
+<span class="status <?=$r['status']?>">
+<?=ucfirst($r['status'])?>
+</span>
 
 </div>
 
-<!-- TABLE -->
-<div class="card">
-<h5>All Suggestions</h5>
-
-<table class="table table-bordered table-hover">
-<thead class="table-dark">
-<tr>
-<th>ID</th>
-<th>Message</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-</thead>
-
-<tbody>
-
-<?php while($row = $suggestions->fetch_assoc()){ ?>
-
-<tr>
-<td><?= $row['suggestion_id'] ?></td>
-<td><?= htmlspecialchars($row['message']) ?></td>
-
-<td>
-<?php if($row['status']=='approved'){ ?>
-<span class="badge bg-success">Approved</span>
-<?php } elseif($row['status']=='rejected'){ ?>
-<span class="badge bg-danger">Rejected</span>
-<?php } else { ?>
-<span class="badge bg-warning text-dark">Pending</span>
-<?php } ?>
-</td>
-
-<td>
-
-<a href="?approve=<?= $row['suggestion_id'] ?>" class="btn btn-success btn-sm">Approve</a>
-
-<a href="?reject=<?= $row['suggestion_id'] ?>" class="btn btn-danger btn-sm">Reject</a>
-
-<a href="?delete=<?= $row['suggestion_id'] ?>" class="btn btn-dark btn-sm"
-onclick="return confirm('Delete this suggestion?')">Delete</a>
-
-<!-- Reply button -->
-<button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#reply<?= $row['suggestion_id'] ?>">
-Reply
-</button>
-
-<!-- Reply Modal -->
-<div class="modal fade" id="reply<?= $row['suggestion_id'] ?>">
-<div class="modal-dialog">
-<div class="modal-content">
-
-<form method="POST">
-
-<div class="modal-header">
-<h5>Reply Suggestion</h5>
-</div>
-
-<div class="modal-body">
-
-<input type="hidden" name="suggestion_id" value="<?= $row['suggestion_id'] ?>">
-
-<textarea name="reply" class="form-control" required></textarea>
-
-</div>
-
-<div class="modal-footer">
-<button type="submit" name="reply_submit" class="btn btn-primary">Send Reply</button>
-</div>
-
-</form>
-
-</div>
-</div>
-</div>
-
-</td>
-</tr>
-
-<?php } ?>
-
-</tbody>
-</table>
+<?php endwhile; ?>
 
 </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</div>
 
 </body>
 </html>

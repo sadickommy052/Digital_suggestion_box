@@ -4,73 +4,110 @@ include("config/db.php");
 
 if($_SERVER["REQUEST_METHOD"]=="POST"){
 
-    $full_name = $_POST['full_name'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+$full_name=$_POST['full_name'];
+$email=$_POST['email'];
+$password=$_POST['password'];
+$confirm_password=$_POST['confirm_password'];
 
-    if($password != $confirm_password){
-        $error = "Passwords do not match!";
-    } else {
+if($password!=$confirm_password){
 
-        // check email exists (UPDATED TABLE)
-        $stmt = $conn->prepare("
-            SELECT user_id 
-            FROM users 
-            WHERE email = ?
-        ");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
+$error="Passwords do not match!";
 
-        if($result->num_rows > 0){
-            $error = "Email already exists!";
-        } else {
+}else{
 
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+$stmt=$conn->prepare("SELECT user_id FROM users WHERE email=?");
+$stmt->bind_param("s",$email);
+$stmt->execute();
+$result=$stmt->get_result();
 
-            // DEFAULT ROLE = suggester
-            $role = "suggester";
+if($result->num_rows>0){
 
-            // DEFAULT STATUS = active
-            $status = "active";
+$error="Email already exists!";
 
-            $stmt = $conn->prepare("
-                INSERT INTO users
-                (full_name, email, password, role, status, created_at)
-                VALUES (?, ?, ?, ?, ?, NOW())
-            ");
+}else{
 
-            $stmt->bind_param(
-                "sssss",
-                $full_name,
-                $email,
-                $hashed_password,
-                $role,
-                $status
-            );
+$profile_picture="";
 
-            if($stmt->execute()){
-                header("Location: login.php");
-                exit();
-            } else {
-                $error = "Registration failed!";
-            }
-        }
-    }
+if(isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error']==0){
+
+$file=$_FILES['profile_picture']['name'];
+$tmp=$_FILES['profile_picture']['tmp_name'];
+
+$ext=strtolower(pathinfo($file,PATHINFO_EXTENSION));
+
+$allowed=['jpg','jpeg','png','gif'];
+
+if(in_array($ext,$allowed)){
+
+$new=time()."_".$file;
+$path="uploads/".$new;
+
+move_uploaded_file($tmp,$path);
+
+$profile_picture=$path;
+
+}else{
+
+$error="Only images allowed";
+
 }
+
+}else{
+
+$error="Choose profile picture";
+
+}
+
+
+if(empty($error)){
+
+$hash=password_hash($password,PASSWORD_DEFAULT);
+
+$role="suggester";
+$status="active";
+
+$stmt=$conn->prepare("INSERT INTO users(full_name,email,password,role,status,profile_picture,created_at) VALUES(?,?,?,?,?,?,NOW())");
+
+$stmt->bind_param(
+"ssssss",
+$full_name,
+$email,
+$hash,
+$role,
+$status,
+$profile_picture
+);
+
+if($stmt->execute()){
+
+header("Location: login.php");
+exit();
+
+}else{
+
+$error="Registration failed";
+
+}
+
+}
+
+}
+
+}
+
+}
+
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Register</title>
+<title>Register</title>
 
 <style>
-
 body{
     margin:0;
-    font-family:Segoe UI;
+    font-family:Segoe UI, sans-serif;
     background:#f4f7fc;
     height:100vh;
     display:flex;
@@ -78,63 +115,71 @@ body{
     align-items:center;
 }
 
+/* CARD CONTAINER */
 .container{
     width:420px;
     background:#ffffff;
-    padding:30px;
-    border-radius:15px;
-    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
     border:1px solid #e5e7eb;
 }
 
+/* TITLE */
 h2{
     text-align:center;
     color:#111827;
-    margin-bottom:20px;
-}
-
-input{
-    width:100%;
-    padding:12px;
-    margin:10px 0;
-    border-radius:8px;
-    border:1px solid #d1d5db;
-    background:white;
-    box-sizing:border-box;
-}
-
-input:focus{
-    outline:none;
-    border-color:#1f4b99;
-    box-shadow:0 0 0 3px rgba(31,75,153,0.1);
-}
-
-button{
-    width:100%;
-    padding:12px;
-    background:#1f4b99;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
-}
-
-button:hover{
-    background:#163a77;
-}
-
-.error{
-    background:#fef2f2;
-    padding:10px;
-    color:#dc2626;
-    border:1px solid #fecaca;
-    border-radius:8px;
-    text-align:center;
     margin-bottom:10px;
 }
 
+/* INPUTS + BUTTON */
+input,button{
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    box-sizing:border-box;
+    border-radius:8px;
+    font-size:14px;
+}
+
+/* INPUT STYLE */
+input{
+    border:1px solid #d1d5db;
+    outline:none;
+    transition:0.2s;
+}
+
+input:focus{
+    border-color:#111827;
+    box-shadow:0 0 0 3px rgba(17,24,39,0.15);
+}
+
+/* BUTTON (SIDEBAR COLOR THEME) */
+button{
+    background:#111827;
+    color:white;
+    border:0;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.2s;
+}
+
+button:hover{
+    background:#1f2937;
+}
+
+/* ERROR BOX */
+.error{
+    background:#fee2e2;
+    color:#991b1b;
+    padding:10px;
+    border-radius:8px;
+    text-align:center;
+    font-size:14px;
+    border:1px solid #fecaca;
+}
 </style>
+
 </head>
 
 <body>
@@ -145,11 +190,16 @@ button:hover{
 
 <?php if(!empty($error)) echo "<div class='error'>$error</div>"; ?>
 
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
 
 <input type="text" name="full_name" placeholder="Full Name" required>
+
 <input type="email" name="email" placeholder="Email" required>
+
+<input type="file" name="profile_picture" accept="image/*" required>
+
 <input type="password" name="password" placeholder="Password" required>
+
 <input type="password" name="confirm_password" placeholder="Confirm Password" required>
 
 <button type="submit">Register</button>

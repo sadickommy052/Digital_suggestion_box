@@ -95,67 +95,100 @@ $conn,
 <style>
 
 body{
-background:#f5f7fb;
-font-family:Segoe UI;
+    margin:0;
+    font-family:Segoe UI, sans-serif;
+    background:#f4f7fc;
+    color:#111827;
 }
 
+/* ================= CONTENT ================= */
 .content{
-margin-left:240px;
-padding:25px;
+    margin-left:200px;
+    padding:80px;
 }
 
+/* ================= HEADER ================= */
+.header{
+    background:#111827;
+    color:#fff;
+    padding:50px;
+    border-radius:12px;
+    margin-bottom:20px;
+}
+
+.header h3{
+    margin:0;
+    font-size:20px;
+}
+
+.header p{
+    margin-top:5px;
+    color:#cbd5e1;
+}
+
+/* ================= GRID ================= */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+    gap:15px;
+}
+
+/* ================= CARD ================= */
 .card{
-border:none;
-border-radius:15px;
-padding:20px;
-box-shadow:0 5px 15px rgba(0,0,0,.08);
-transition:.3s;
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    padding:20px;
+    text-align:center;
+    box-shadow:0 6px 15px rgba(0,0,0,0.05);
+    transition:0.2s;
 }
 
 .card:hover{
-transform:translateY(-5px);
+    transform:translateY(-3px);
 }
 
+/* ICON */
 .card i{
-font-size:25px;
-margin-bottom:10px;
+    font-size:22px;
+    color:#111827;
+    margin-bottom:10px;
 }
 
-h3{
-font-weight:bold;
+/* TITLE */
+.card h6{
+    margin:5px 0;
+    color:#6b7280;
+    font-size:13px;
 }
 
-.header{
-background:white;
-padding:20px;
-border-radius:15px;
-margin-bottom:20px;
-box-shadow:0 5px 15px rgba(0,0,0,.08);
+/* NUMBER */
+.card h3{
+    margin:0;
+    font-size:22px;
+    color:#111827;
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:900px){
+    .content{
+        margin-left:0;
+        padding:15px;
+    }
 }
 
 </style>
-
 </head>
 
 <body>
 
 <?php include("../sider/sider.php"); ?>
+<?php include("../toper/toper.php"); ?>
 
 <div class="content">
 
 <div class="header">
 
-<h3>
-<i class="fas fa-user-shield"></i>
-Admin Dashboard
-</h3>
-
-<p>
-Welcome,
-<b><?php echo $full_name; ?></b>
-</p>
-
-</div>
 
 
 <div class="row">
