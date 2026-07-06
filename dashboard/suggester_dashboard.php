@@ -251,7 +251,7 @@ body{
 
 <div class="content">
 
-<!-- 🔥 NEW STATS BLOCK ADDED -->
+<!-- STATS -->
 <div class="stats">
 
 <div class="card">

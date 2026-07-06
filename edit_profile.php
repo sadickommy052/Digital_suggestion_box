@@ -45,6 +45,7 @@ $stmt->close();
 ========================= */
 
 $message = "";
+$messageType = "";
 
 if(isset($_POST['update'])){
 
@@ -83,6 +84,7 @@ if(isset($_POST['update'])){
 
         if(!password_verify($_POST['old_password'], $db_password)){
             $message = "Old password is incorrect!";
+            $messageType = "error";
         }else{
 
             $hashed = password_hash($_POST['new_password'], PASSWORD_DEFAULT);
@@ -120,6 +122,11 @@ if(isset($_POST['update'])){
 
     if(isset($stmt) && $stmt->execute()){
         $message = "Profile updated successfully!";
+        $messageType = "success";
+        // Update variables to reflect new values
+        $full_name = $new_name;
+        $email = $new_email;
+        $profile_picture = $new_profile;
     }
 
     if(isset($stmt)){
@@ -139,141 +146,295 @@ if(isset($_POST['update'])){
 
 <style>
 
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
 body{
-margin:0;
-font-family:Segoe UI, Arial;
-background:#f4f6f9;
+    margin:0;
+    font-family:'Segoe UI', Arial, sans-serif;
+    background:#f4f6f9;
 }
 
 .container{
-margin-left:250px;
-padding:100px;
+    margin-left:220px;
+    padding:100px 30px 30px 30px;
+    min-height:100vh;
 }
 
 .card{
-max-width:650px;
-margin:auto;
-background:white;
-border-radius:10px;
-box-shadow:0 2px 10px rgba(0,0,0,0.08);
-overflow:hidden;
+    max-width:750px;
+    margin:auto;
+    background:#ffffff;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.06);
+    overflow:hidden;
+    border:1px solid #e5e7eb;
 }
 
-/* HEADER */
+/* ================= HEADER ================= */
 .header{
-background:#111827;
-color:white;
-text-align:center;
-padding:25px;
+    background:#111827;
+    color:white;
+    padding:25px 30px;
+    border-bottom:1px solid #1f2937;
 }
 
 .header h2{
-margin:0;
+    margin:0;
+    font-size:20px;
+    font-weight:600;
 }
 
-/* FORM */
-form{
+.header h2 i{
+    margin-right:10px;
+    color:#9ca3af;
+}
+
+.header p{
+    margin:6px 0 0 0;
+    font-size:13px;
+    color:#9ca3af;
+}
+
+/* ================= BODY ================= */
+.body{
+    padding:30px;
+}
+
+/* ================= PROFILE PREVIEW ================= */
+.profile-preview{
+    text-align:center;
+    margin-bottom:25px;
+    padding-bottom:25px;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.profile-preview .avatar{
+    width:100px;
+    height:100px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #111827;
+    background:#e5e7eb;
+}
+
+.profile-preview .avatar-letter{
+    width:100px;
+    height:100px;
+    border-radius:50%;
+    background:#111827;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:40px;
+    font-weight:600;
+    margin:0 auto;
+    border:3px solid #111827;
+}
+
+.profile-preview .avatar-wrapper{
+    display:inline-block;
+    position:relative;
+}
+
+.profile-preview .camera-icon{
+    position:absolute;
+    bottom:2px;
+    right:2px;
+    background:#374151;
+    color:white;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:2px solid white;
+    font-size:12px;
+}
+
+/* ================= FORM ================= */
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.form-group{
     display:flex;
     flex-direction:column;
-    gap:15px;
-    margin-top:15px;
+    gap:5px;
 }
 
-/* each input block */
-form > div{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
+.form-group.full-width{
+    grid-column:1 / -1;
 }
 
-/* labels */
-label{
+.form-group label{
     font-size:13px;
     font-weight:600;
     color:#374151;
+    display:flex;
+    align-items:center;
+    gap:8px;
 }
 
-/* inputs */
-input{
-    padding:12px;
-    border:1px solid #e5e7eb;
+.form-group label i{
+    color:#6b7280;
+    width:16px;
+    font-size:13px;
+}
+
+.form-group input{
+    padding:10px 14px;
+    border:1px solid #d1d5db;
     border-radius:8px;
     outline:none;
     font-size:14px;
-    transition:0.2s;
+    transition:all 0.2s ease;
+    background:#fafbfc;
 }
 
-/* focus effect */
-input:focus{
-    border-color:#1e3a8a;
-    box-shadow:0 0 0 2px rgba(30,58,138,0.15);
+.form-group input:focus{
+    border-color:#111827;
+    box-shadow:0 0 0 3px rgba(17,24,39,0.08);
+    background:white;
 }
 
-/* layout improvement (2 columns on big screens) */
-@media(min-width:768px){
-    form{
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:15px;
-    }
-
-    /* full width fields if needed */
-    form div:nth-child(1),
-    form div:nth-child(2){
-        grid-column:span 1;
-    }
+.form-group input::placeholder{
+    color:#9ca3af;
+    font-size:13px;
 }
 
-/* PROFILE PREVIEW */
-.preview{
-text-align:center;
-margin-bottom:10px;
+.form-group input[type="file"]{
+    padding:8px 12px;
+    background:white;
+    border:1px dashed #d1d5db;
 }
 
-.preview img{
-width:100px;
-height:100px;
-border-radius:50%;
-object-fit:cover;
-border:3px solid #1e3a8a;
+.form-group input[type="file"]:hover{
+    border-color:#111827;
+    background:#f8fafc;
 }
 
-.preview .letter{
-width:100px;
-height:100px;
-border-radius:50%;
-background:#1e3a8a;
-display:flex;
-align-items:center;
-justify-content:center;
-color:white;
-font-size:40px;
-margin:auto;
+/* ================= BUTTON ================= */
+.btn-submit{
+    grid-column:1 / -1;
+    padding:12px;
+    background:#111827;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.2s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-top:5px;
 }
 
-/* BUTTON */
-.btn{
-background:#1e3a8a;
-color:white;
-padding:12px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-font-weight:bold;
+.btn-submit:hover{
+    background:#1f2937;
 }
 
-.btn:hover{
-opacity:0.9;
+.btn-submit:active{
+    transform:scale(0.98);
 }
 
+/* ================= MESSAGE ================= */
 .message{
-text-align:center;
-color:green;
-font-weight:bold;
+    padding:12px 16px;
+    border-radius:8px;
+    font-weight:600;
+    font-size:14px;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:10px;
 }
 
+.message.success{
+    background:#f0fdf4;
+    color:#166534;
+    border:1px solid #bbf7d0;
+}
+
+.message.error{
+    background:#fef2f2;
+    color:#991b1b;
+    border:1px solid #fecaca;
+}
+
+.message i{
+    font-size:16px;
+}
+
+/* ================= RESPONSIVE ================= */
 @media(max-width:768px){
-.container{margin-left:0;}
+    .container{
+        margin-left:0;
+        padding:80px 15px 15px 15px;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .form-group.full-width{
+        grid-column:1;
+    }
+
+    .btn-submit{
+        grid-column:1;
+    }
+
+    .card{
+        border-radius:10px;
+    }
+
+    .header h2{
+        font-size:18px;
+    }
+
+    .profile-preview .avatar,
+    .profile-preview .avatar-letter{
+        width:80px;
+        height:80px;
+        font-size:32px;
+    }
+
+    .profile-preview .camera-icon{
+        width:28px;
+        height:28px;
+        font-size:11px;
+    }
+}
+
+@media(max-width:480px){
+    .body{
+        padding:20px;
+    }
+
+    .header{
+        padding:18px 20px;
+    }
+
+    .form-group input{
+        padding:8px 12px;
+        font-size:13px;
+    }
+
+    .btn-submit{
+        padding:10px;
+        font-size:14px;
+    }
 }
 
 </style>
@@ -286,61 +447,79 @@ font-weight:bold;
 
 <div class="container">
 
-<div class="card">
+    <div class="card">
 
-<div class="header">
-<h2>Edit Profile</h2>
-</div>
+        <!-- HEADER -->
+        <div class="header">
+            <h2><i class="fas fa-user-edit"></i> Edit Profile</h2>
+            <p>Update your personal information</p>
+        </div>
 
-<?php if($message){ ?>
-<p class="message"><?=$message?></p>
-<?php } ?>
+        <!-- BODY -->
+        <div class="body">
 
-<div class="form">
+            <?php if($message){ ?>
+                <div class="message <?=$messageType?>">
+                    <i class="fas <?= $messageType == 'success' ? 'fa-check-circle' : 'fa-exclamation-circle' ?>"></i>
+                    <?=$message?>
+                </div>
+            <?php } ?>
 
-<div class="preview">
+            <!-- PROFILE PREVIEW -->
+            <div class="profile-preview">
+                <div class="avatar-wrapper">
+                    <?php if(!empty($profile_picture) && file_exists(__DIR__."/".$profile_picture)){ ?>
+                        <img src="<?=$profile_picture?>" class="avatar" alt="Profile Picture">
+                    <?php }else{ ?>
+                        <div class="avatar-letter">
+                            <?=strtoupper(substr($full_name,0,1))?>
+                        </div>
+                    <?php } ?>
+                    <div class="camera-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+            </div>
 
-<?php if(!empty($profile_picture) && file_exists(__DIR__."/".$profile_picture)){ ?>
-    <img src="<?=$profile_picture?>">
-<?php }else{ ?>
-    <div class="letter">
-        <?=strtoupper(substr($full_name,0,1))?>
+            <!-- FORM -->
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Full Name</label>
+                        <input type="text" name="full_name" value="<?=htmlspecialchars($full_name)?>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" name="email" value="<?=htmlspecialchars($email)?>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Old Password</label>
+                        <input type="password" name="old_password" placeholder="Enter old password">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-key"></i> New Password</label>
+                        <input type="password" name="new_password" placeholder="Enter new password">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-image"></i> Profile Picture</label>
+                        <input type="file" name="profile_picture" accept="image/*">
+                    </div>
+
+                    <button type="submit" name="update" class="btn-submit">
+                        <i class="fas fa-save"></i> Update Profile
+                    </button>
+
+                </div>
+            </form>
+
+        </div>
+
     </div>
-<?php } ?>
-
-</div>
-
-<form method="POST" enctype="multipart/form-data">
-<div>
-<label>Full Name</label>
-<input type="text" name="full_name" value="<?=htmlspecialchars($full_name)?>" required>
-</div>
-<div>
-<label>Email</label>
-<input type="email" name="email" value="<?=htmlspecialchars($email)?>" required>
-</div>
-<div>
-<label>Old Password</label>
-<input type="password" name="old_password" placeholder="Enter old password">
-</div>
-<div>
-<label>New Password</label>
-<input type="password" name="new_password" placeholder="Enter new password">
-</div>
-<div>
-<label>Profile Picture</label>
-<input type="file" name="profile_picture">
-</div>
-
-<button type="submit" name="update" class="btn">
-<i class="fas fa-save"></i> Update Profile
-</button>
-
-</form>
-
-</div>
-
-</div>
 
 </div>
 

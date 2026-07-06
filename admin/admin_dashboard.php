@@ -103,7 +103,7 @@ body{
 
 /* ================= CONTENT ================= */
 .content{
-    margin-left:200px;
+    margin-left:170px;
     padding:80px;
 }
 

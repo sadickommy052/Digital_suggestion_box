@@ -2,6 +2,10 @@
 session_start();
 include("../config/db.php");
 
+// Enable error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if(!isset($_SESSION['user_id']) || ($_SESSION['role']??'')!='suggestion_manager'){
     header("Location: ../login.php");
     exit();
@@ -72,14 +76,29 @@ exit();
 }
 
 /* ================= STATS ================= */
-$total=$conn->query("SELECT COUNT(*) c FROM suggestions")->fetch_assoc()['c'];
-$pending=$conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='pending'")->fetch_assoc()['c'];
-$approved=$conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='approved'")->fetch_assoc()['c'];
-$rejected=$conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='rejected'")->fetch_assoc()['c'];
-$implemented=$conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='implemented'")->fetch_assoc()['c'];
+$total = 0;
+$pending = 0;
+$approved = 0;
+$rejected = 0;
+$implemented = 0;
+
+$total_result = $conn->query("SELECT COUNT(*) c FROM suggestions");
+if($total_result){ $total = $total_result->fetch_assoc()['c']; }
+
+$pending_result = $conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='pending'");
+if($pending_result){ $pending = $pending_result->fetch_assoc()['c']; }
+
+$approved_result = $conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='approved'");
+if($approved_result){ $approved = $approved_result->fetch_assoc()['c']; }
+
+$rejected_result = $conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='rejected'");
+if($rejected_result){ $rejected = $rejected_result->fetch_assoc()['c']; }
+
+$implemented_result = $conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='implemented'");
+if($implemented_result){ $implemented = $implemented_result->fetch_assoc()['c']; }
 
 /* ================= RECENT ================= */
-$recent=$conn->query("
+$recent = $conn->query("
 SELECT 
     s.*,
     u.full_name,
@@ -217,6 +236,7 @@ align-items:center;
 
 <div class="recent-grid">
 
+<?php if($recent && $recent->num_rows > 0): ?>
 <?php while($r=$recent->fetch_assoc()): ?>
 
 <div class="recent-card">
@@ -239,6 +259,11 @@ align-items:center;
 </div>
 
 <?php endwhile; ?>
+<?php else: ?>
+<div class="recent-card">
+    <p style="color:#999;text-align:center;">No suggestions found</p>
+</div>
+<?php endif; ?>
 
 </div>
 

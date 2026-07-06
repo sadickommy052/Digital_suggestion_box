@@ -69,6 +69,42 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
 
+        // ============================================================
+        // 🔔 SEND NOTIFICATION TO ALL MANAGERS
+        // ============================================================
+        
+        // Get suggester's name
+        $user_query = $conn->prepare("SELECT full_name FROM users WHERE user_id = ?");
+        $user_query->bind_param("i", $user_id);
+        $user_query->execute();
+        $user_data = $user_query->get_result()->fetch_assoc();
+        $suggester_name = $user_data['full_name'] ?? 'A user';
+        $user_query->close();
+        
+        // Get all managers
+        $managers = $conn->query("SELECT user_id FROM users WHERE role = 'suggestion_manager'");
+        
+        if($managers->num_rows > 0){
+            $notify_title = "New Suggestion Submitted";
+            $notify_message = "A new suggestion '$title' has been submitted by $suggester_name. Please review it.";
+            $notify_type = "new_suggestion";
+            
+            while($manager = $managers->fetch_assoc()){
+                $manager_id = $manager['user_id'];
+                
+                $notify = $conn->prepare("
+                    INSERT INTO notifications (user_id, title, message, type, is_read, created_at) 
+                    VALUES (?, ?, ?, ?, 0, NOW())
+                ");
+                
+                $notify->bind_param("isss", $manager_id, $notify_title, $notify_message, $notify_type);
+                $notify->execute();
+                $notify->close();
+            }
+        }
+        
+        // ============================================================
+
         $message = "Suggestion submitted successfully!";
         $messageType = "success";
     }
@@ -84,46 +120,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
-<style>
 
 /* ================= GLOBAL THEME ================= */
 body{
     margin:0;
     font-family:'Segoe UI', sans-serif;
-    background:#f5f7fb;
+    background:#f4f6f9;
     color:#111827;
-}
-
-/* ================= TOPBAR ================= */
-.topbar{
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    height:60px;
-    background:#111827;
-    border-bottom:1px solid #1f2937;
-    z-index:9999;
-    color:#fff;
-}
-
-/* ================= SIDEBAR ================= */
-.sidebar{
-    position:fixed;
-    top:60px;
-    left:0;
-    width:250px;
-    height:calc(100vh - 60px);
-    background:#111827;
-    border-right:1px solid #1f2937;
-    z-index:9998;
-    color:#fff;
 }
 
 /* ================= CONTENT ================= */
 .content{
-    margin-left:250px;
-    padding:120px 130px 150px;
+    margin-left:220px;
+    padding:100px 30px 30px 30px;
+    min-height:100vh;
 }
 
 /* ================= CENTER WRAPPER ================= */
@@ -136,28 +146,34 @@ body{
 .card{
     background:#ffffff;
     border:1px solid #e5e7eb;
-    border-radius:14px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.06);
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.06);
     overflow:hidden;
 }
 
-/* HEADER (SIDEBAR ACCENT STYLE) */
+/* ================= HEADER ================= */
 .card-header{
-    background:#1e3a8a; /* blue accent like sidebar active */
-    color:#fff;
-    padding:16px;
+    background:#111827;
+    color:white;
+    padding:18px 24px;
     font-weight:600;
+    font-size:18px;
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:12px;
+    border-bottom:1px solid #1f2937;
 }
 
-/* BODY */
+.card-header i{
+    color:#9ca3af;
+}
+
+/* ================= BODY ================= */
 .card-body{
-    padding:22px;
+    padding:28px 30px;
 }
 
-/* LABEL */
+/* ================= LABEL ================= */
 label{
     display:block;
     margin-bottom:6px;
@@ -166,59 +182,163 @@ label{
     color:#374151;
 }
 
-/* INPUTS */
+label i{
+    margin-right:8px;
+    color:#6b7280;
+    width:16px;
+}
+
+/* ================= INPUTS ================= */
 input, select, textarea{
     width:100%;
-    padding:12px;
-    border-radius:10px;
+    padding:10px 14px;
+    border-radius:8px;
     border:1px solid #d1d5db;
-    margin-bottom:15px;
-    background:#fff;
+    margin-bottom:18px;
+    background:#fafbfc;
     font-size:14px;
-    transition:0.2s;
+    transition:all 0.2s ease;
+    color:#111827;
+    box-sizing:border-box;
 }
 
-/* FOCUS STATE (MATCH SIDEBAR BLUE) */
 input:focus, select:focus, textarea:focus{
-    border-color:#2563eb;
-    box-shadow:0 0 0 3px rgba(37,99,235,0.15);
+    border-color:#111827;
+    box-shadow:0 0 0 3px rgba(17,24,39,0.08);
     outline:none;
+    background:white;
 }
 
-/* BUTTON (PRIMARY SIDEBAR BLUE) */
+input::placeholder, textarea::placeholder{
+    color:#9ca3af;
+}
+
+textarea{
+    resize:vertical;
+    min-height:120px;
+}
+
+select{
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+    cursor:pointer;
+}
+
+input[type="file"]{
+    padding:8px 12px;
+    background:white;
+    border:1px dashed #d1d5db;
+    cursor:pointer;
+}
+
+input[type="file"]:hover{
+    border-color:#111827;
+    background:#f8fafc;
+}
+
+/* ================= BUTTON ================= */
 button{
     width:100%;
     padding:12px;
     border:none;
-    border-radius:10px;
-    background:#2563eb;
+    border-radius:8px;
+    background:#111827;
     color:#fff;
     font-weight:600;
+    font-size:15px;
     cursor:pointer;
-    transition:0.2s;
+    transition:all 0.2s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-top:5px;
 }
 
-/* BUTTON HOVER (DARK SIDEBAR STYLE) */
 button:hover{
     background:#1f2937;
 }
 
-/* ALERT BOXES */
-.alert{
-    padding:10px;
-    border-radius:10px;
-    margin-bottom:15px;
-    font-size:14px;
+button:active{
+    transform:scale(0.98);
 }
 
-/* STATUS COLORS */
-.success{background:#dcfce7;color:#166534;}
-.warning{background:#fef3c7;color:#92400e;}
-.danger{background:#fee2e2;color:#991b1b;}
+button i{
+    font-size:16px;
+}
 
-/* OPTIONAL MODERN TOUCH */
-input, select, textarea, button{
-    box-shadow:0 2px 6px rgba(0,0,0,0.04);
+/* ================= ALERT BOXES ================= */
+.alert{
+    padding:12px 16px;
+    border-radius:8px;
+    margin-bottom:20px;
+    font-size:14px;
+    font-weight:500;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.alert i{
+    font-size:16px;
+}
+
+.success{
+    background:#f0fdf4;
+    color:#166534;
+    border:1px solid #bbf7d0;
+}
+
+.warning{
+    background:#fffbeb;
+    color:#92400e;
+    border:1px solid #fde68a;
+}
+
+.danger{
+    background:#fef2f2;
+    color:#991b1b;
+    border:1px solid #fecaca;
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:768px){
+    .content{
+        margin-left:0;
+        padding:80px 15px 15px 15px;
+    }
+
+    .card-body{
+        padding:20px;
+    }
+
+    .card-header{
+        padding:14px 18px;
+        font-size:16px;
+    }
+
+    input, select, textarea{
+        padding:8px 12px;
+        font-size:13px;
+    }
+
+    button{
+        padding:10px;
+        font-size:14px;
+    }
+}
+
+@media(max-width:480px){
+    .card-body{
+        padding:16px;
+    }
+
+    .card-header{
+        padding:12px 16px;
+        font-size:15px;
+    }
 }
 
 </style>
@@ -236,7 +356,7 @@ input, select, textarea, button{
         <div class="card">
 
             <div class="card-header">
-                <i class="fa fa-paper-plane"></i>
+                <i class="fas fa-paper-plane"></i>
                 Submit Suggestion
             </div>
 
@@ -244,13 +364,14 @@ input, select, textarea, button{
 
                 <?php if($message): ?>
                     <div class="alert <?= $messageType ?>">
+                        <i class="fas <?= $messageType == 'success' ? 'fa-check-circle' : ($messageType == 'warning' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle') ?>"></i>
                         <?= $message ?>
                     </div>
                 <?php endif; ?>
 
                 <form method="POST" enctype="multipart/form-data">
 
-                    <label>Category</label>
+                    <label><i class="fas fa-list"></i> Category</label>
                     <select name="category" required>
                         <option value="">Select category</option>
                         <?php
@@ -263,17 +384,17 @@ input, select, textarea, button{
                         <?php } ?>
                     </select>
 
-                    <label>Title</label>
-                    <input type="text" name="title" required>
+                    <label><i class="fas fa-heading"></i> Title</label>
+                    <input type="text" name="title" placeholder="Enter suggestion title" required>
 
-                    <label>Description</label>
-                    <textarea name="description" rows="4" required></textarea>
+                    <label><i class="fas fa-align-left"></i> Description</label>
+                    <textarea name="description" rows="4" placeholder="Describe your suggestion in detail" required></textarea>
 
-                    <label>Attachment (optional)</label>
+                    <label><i class="fas fa-paperclip"></i> Attachment (optional)</label>
                     <input type="file" name="attachment">
 
                     <button type="submit">
-                        <i class="fa fa-paper-plane"></i> Submit
+                        <i class="fas fa-paper-plane"></i> Submit Suggestion
                     </button>
 
                 </form>

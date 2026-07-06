@@ -147,7 +147,7 @@ if (isset($_GET['edit'])) {
     }
 }
 
-/* ================= FETCH (FIXED CORE ISSUE) ================= */
+/* ================= FETCH ================= */
 $stmt = $conn->prepare("
     SELECT 
         s.suggestion_id,
@@ -336,4 +336,4 @@ onclick="return confirm('Delete?')">Delete</a>
 </div>
 
 </body>
-</html> 
+</html>

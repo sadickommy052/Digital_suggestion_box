@@ -10,33 +10,116 @@ header("Location: ../login.php");
 exit();
 }
 
-/* ACTIONS */
+/* ================= ACTIONS WITH NOTIFICATIONS ================= */
+
 if(isset($_GET['approve'])){
 $id=intval($_GET['approve']);
-$conn->query("UPDATE suggestions SET status='approved' WHERE suggestion_id=$id");
-header("Location: all_suggestions.php");
+
+// Get suggestion owner and title
+$q=$conn->prepare("SELECT user_id, title FROM suggestions WHERE suggestion_id=?");
+$q->bind_param("i",$id);
+$q->execute();
+$owner=$q->get_result()->fetch_assoc();
+
+if($owner){
+    $user_id = $owner['user_id'];
+    $suggestion_title = $owner['title'];
+    
+    // Update status
+    $conn->query("UPDATE suggestions SET status='approved' WHERE suggestion_id=$id");
+    
+    // Send notification
+    $title = "Suggestion Approved";
+    $msg = "Your suggestion '$suggestion_title' has been approved.";
+    $type = "suggestion_approved";
+    
+    $n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
+    $n->bind_param("isss",$user_id,$title,$msg,$type);
+    $n->execute();
+}
+
+header("Location: all_suggestions.php?msg=approved");
 exit();
 }
 
 if(isset($_GET['reject'])){
 $id=intval($_GET['reject']);
-$conn->query("UPDATE suggestions SET status='rejected' WHERE suggestion_id=$id");
-header("Location: all_suggestions.php");
+
+$q=$conn->prepare("SELECT user_id, title FROM suggestions WHERE suggestion_id=?");
+$q->bind_param("i",$id);
+$q->execute();
+$owner=$q->get_result()->fetch_assoc();
+
+if($owner){
+    $user_id = $owner['user_id'];
+    $suggestion_title = $owner['title'];
+    
+    $conn->query("UPDATE suggestions SET status='rejected' WHERE suggestion_id=$id");
+    
+    $title = "Suggestion Rejected";
+    $msg = "Your suggestion '$suggestion_title' has been rejected.";
+    $type = "suggestion_rejected";
+    
+    $n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
+    $n->bind_param("isss",$user_id,$title,$msg,$type);
+    $n->execute();
+}
+
+header("Location: all_suggestions.php?msg=rejected");
 exit();
 }
 
-/* ✅ ADDED IMPLEMENTED ACTION */
 if(isset($_GET['implement'])){
 $id=intval($_GET['implement']);
-$conn->query("UPDATE suggestions SET status='implemented' WHERE suggestion_id=$id");
-header("Location: all_suggestions.php");
+
+$q=$conn->prepare("SELECT user_id, title FROM suggestions WHERE suggestion_id=?");
+$q->bind_param("i",$id);
+$q->execute();
+$owner=$q->get_result()->fetch_assoc();
+
+if($owner){
+    $user_id = $owner['user_id'];
+    $suggestion_title = $owner['title'];
+    
+    $conn->query("UPDATE suggestions SET status='implemented' WHERE suggestion_id=$id");
+    
+    $title = "Suggestion Implemented";
+    $msg = "Your suggestion '$suggestion_title' has been implemented.";
+    $type = "suggestion_implemented";
+    
+    $n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
+    $n->bind_param("isss",$user_id,$title,$msg,$type);
+    $n->execute();
+}
+
+header("Location: all_suggestions.php?msg=implemented");
 exit();
 }
 
 if(isset($_GET['delete'])){
 $id=intval($_GET['delete']);
-$conn->query("DELETE FROM suggestions WHERE suggestion_id=$id");
-header("Location: all_suggestions.php");
+
+$q=$conn->prepare("SELECT user_id, title FROM suggestions WHERE suggestion_id=?");
+$q->bind_param("i",$id);
+$q->execute();
+$owner=$q->get_result()->fetch_assoc();
+
+if($owner){
+    $user_id = $owner['user_id'];
+    $suggestion_title = $owner['title'];
+    
+    $conn->query("DELETE FROM suggestions WHERE suggestion_id=$id");
+    
+    $title = "Suggestion Deleted";
+    $msg = "Your suggestion '$suggestion_title' was deleted.";
+    $type = "suggestion_deleted";
+    
+    $n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
+    $n->bind_param("isss",$user_id,$title,$msg,$type);
+    $n->execute();
+}
+
+header("Location: all_suggestions.php?msg=deleted");
 exit();
 }
 
@@ -227,6 +310,18 @@ text-decoration:none;
 .btn-delete{background:#111827;color:white;}
 .btn-implement{background:#3b82f6;color:white;}
 
+/* Alert messages */
+.alert-msg{
+padding:12px 20px;
+border-radius:8px;
+margin-bottom:15px;
+display:flex;
+align-items:center;
+gap:10px;
+}
+.alert-success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;}
+.alert-error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;}
+
 @media(max-width:900px){
 .content{margin-left:0;padding:15px}
 .filter-box{grid-template-columns:1fr}
@@ -243,6 +338,27 @@ text-decoration:none;
 
 <h3>All Suggestions</h3>
 
+<!-- ================= ALERT MESSAGES ================= -->
+<?php if(isset($_GET['msg'])): 
+    $msg = $_GET['msg'];
+    $text = '';
+    $icon = 'fa-check-circle';
+    
+    if($msg == 'approved') {
+        $text = '✅ Suggestion approved successfully! Notification sent to suggester.';
+    } elseif($msg == 'rejected') {
+        $text = '✅ Suggestion rejected successfully! Notification sent to suggester.';
+    } elseif($msg == 'implemented') {
+        $text = '✅ Suggestion implemented successfully! Notification sent to suggester.';
+    } elseif($msg == 'deleted') {
+        $text = '✅ Suggestion deleted successfully! Notification sent to suggester.';
+    }
+?>
+<div class="alert-msg alert-success">
+    <i class="fas <?=$icon?>"></i> <?=$text?>
+</div>
+<?php endif; ?>
+
 <div class="card">
 <form method="GET" class="filter-box">
 
@@ -250,16 +366,16 @@ text-decoration:none;
 
 <select name="status" class="form-control">
 <option value="">All Status</option>
-<option value="pending">Pending</option>
-<option value="approved">Approved</option>
-<option value="rejected">Rejected</option>
-<option value="implemented">Implemented</option>
+<option value="pending" <?=($status=='pending')?'selected':''?>>Pending</option>
+<option value="approved" <?=($status=='approved')?'selected':''?>>Approved</option>
+<option value="rejected" <?=($status=='rejected')?'selected':''?>>Rejected</option>
+<option value="implemented" <?=($status=='implemented')?'selected':''?>>Implemented</option>
 </select>
 
 <select name="category" class="form-control">
 <option value="">All Category</option>
 <?php while($c=$categories->fetch_assoc()){ ?>
-<option value="<?=$c['category_id']?>"><?=$c['category_name']?></option>
+<option value="<?=$c['category_id']?>" <?=($category==$c['category_id'])?'selected':''?>><?=$c['category_name']?></option>
 <?php } ?>
 </select>
 
@@ -323,10 +439,10 @@ $disagree = $conn->query("SELECT COUNT(*) c FROM votes WHERE suggestion_id=$id A
 </td>
 
 <td>
-<a href="?approve=<?=$row['suggestion_id']?>" class="btn-action btn-approve"><i class="fas fa-check"></i></a>
-<a href="?reject=<?=$row['suggestion_id']?>" class="btn-action btn-reject"><i class="fas fa-times"></i></a>
-<a href="?implement=<?=$row['suggestion_id']?>" class="btn-action btn-implement"><i class="fas fa-check-double"></i></a>
-<a href="?delete=<?=$row['suggestion_id']?>" class="btn-action btn-delete" onclick="return confirm('Delete?')"><i class="fas fa-trash"></i></a>
+<a href="?approve=<?=$row['suggestion_id']?>" class="btn-action btn-approve" title="Approve"><i class="fas fa-check"></i></a>
+<a href="?reject=<?=$row['suggestion_id']?>" class="btn-action btn-reject" title="Reject"><i class="fas fa-times"></i></a>
+<a href="?implement=<?=$row['suggestion_id']?>" class="btn-action btn-implement" title="Implement"><i class="fas fa-check-double"></i></a>
+<a href="?delete=<?=$row['suggestion_id']?>" class="btn-action btn-delete" title="Delete" onclick="return confirm('Delete this suggestion?')"><i class="fas fa-trash"></i></a>
 </td>
 
 </tr>
