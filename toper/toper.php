@@ -88,168 +88,20 @@ $base_path = "/Digital_suggestion_box/dashboard/";
     color:#fff;
     position:fixed;
     top:0;
-    left:253px;
-    
-    right: 0;
+    left:265px;
+    right:0;
     height:60px;
     z-index:9999;
+
+    /* Add border */
+    border:1px solid #374151;
+    border-radius:12px;
 }
 
 .right{
     display:flex;
     gap:15px;
     align-items:center;
-}
-
-/* ================= NOTIFICATIONS ================= */
-.notif-wrapper{
-    position:relative;
-}
-
-.notif-btn{
-    background:#1f2937;
-    border:1px solid #374151;
-    color:#fff;
-    padding:10px;
-    border-radius:10px;
-    cursor:pointer;
-    position:relative;
-}
-
-.notif-badge{
-    position:absolute;
-    top:-5px;
-    right:-5px;
-    background:#dc2626;
-    color:white;
-    border-radius:50%;
-    padding:2px 6px;
-    font-size:10px;
-    font-weight:bold;
-    min-width:18px;
-    text-align:center;
-}
-
-.notif-dropdown{
-    display:none;
-    position:absolute;
-    right:0;
-    top:45px;
-    width:350px;
-    max-height:400px;
-    overflow-y:auto;
-    background:white;
-    color:black;
-    border-radius:10px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.2);
-    z-index:99999;
-}
-
-.notif-dropdown::-webkit-scrollbar{
-    width:5px;
-}
-
-.notif-dropdown::-webkit-scrollbar-thumb{
-    background:#888;
-    border-radius:10px;
-}
-
-.notif-header{
-    padding:12px 15px;
-    font-weight:bold;
-    background:#1e3a8a;
-    color:white;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    position:sticky;
-    top:0;
-    z-index:1;
-}
-
-.notif-header .mark-all{
-    color:#93c5fd;
-    font-size:12px;
-    text-decoration:none;
-    cursor:pointer;
-}
-
-.notif-header .mark-all:hover{
-    text-decoration:underline;
-}
-
-.notif-link{
-    text-decoration:none;
-    color:inherit;
-    display:block;
-}
-
-.notif-link:hover .notif-item{
-    background:#f3f4f6;
-}
-
-.notif-link:hover .notif-item.unread{
-    background:#dbeafe;
-}
-
-.notif-item{
-    padding:12px 15px;
-    border-bottom:1px solid #f0f0f0;
-    display:flex;
-    align-items:flex-start;
-    gap:10px;
-    transition:background 0.2s;
-}
-
-.notif-item.unread{
-    background:#f0f7ff;
-}
-
-.notif-item.read{
-    opacity:0.7;
-}
-
-.notif-icon{
-    font-size:16px;
-    min-width:24px;
-    margin-top:2px;
-}
-
-.notif-content{
-    flex:1;
-}
-
-.notif-title{
-    font-size:14px;
-    font-weight:600;
-    color:#111;
-}
-
-.notif-message{
-    font-size:13px;
-    color:#555;
-    line-height:1.4;
-    margin-top:2px;
-}
-
-.notif-time{
-    font-size:11px;
-    color:#999;
-    margin-top:3px;
-    display:block;
-}
-
-.notif-empty{
-    padding:30px 20px;
-    text-align:center;
-    color:#999;
-}
-
-.notif-empty i{
-    font-size:30px;
-    display:block;
-    margin-bottom:10px;
-    color:#d1d5db;
 }
 
 /* ================= PROFILE ================= */
@@ -289,7 +141,9 @@ $base_path = "/Digital_suggestion_box/dashboard/";
     position:absolute;
     right:0;
     top:45px;
-    width:200px;
+    width:320px;
+    max-height:500px;
+    overflow-y:auto;
     background:white;
     border-radius:10px;
     overflow:hidden;
@@ -297,10 +151,22 @@ $base_path = "/Digital_suggestion_box/dashboard/";
     z-index:99999;
 }
 
+.profile-dropdown::-webkit-scrollbar{
+    width:5px;
+}
+
+.profile-dropdown::-webkit-scrollbar-thumb{
+    background:#888;
+    border-radius:10px;
+}
+
 .profile-info{
     padding:12px;
     background:#1e3a8a;
     color:white;
+    position:sticky;
+    top:0;
+    z-index:1;
 }
 
 .profile-info small{
@@ -309,17 +175,159 @@ $base_path = "/Digital_suggestion_box/dashboard/";
     opacity:0.8;
 }
 
-.profile-dropdown a{
+/* ================= DROPDOWN MENU ITEMS ================= */
+.dropdown-menu a{
     display:flex;
     gap:10px;
-    padding:10px;
+    padding:10px 15px;
     text-decoration:none;
     color:#111;
     font-size:13px;
+    transition:background 0.2s;
+    border-bottom:1px solid #f0f0f0;
 }
 
-.profile-dropdown a:hover{
+.dropdown-menu a:hover{
     background:#f3f4f6;
+}
+
+.dropdown-menu a:last-child{
+    border-bottom:none;
+}
+
+.dropdown-menu .logout{
+    color:#dc2626;
+}
+
+.dropdown-menu .logout:hover{
+    background:#fef2f2;
+}
+
+/* ================= NOTIFICATIONS SUB-DROPDOWN ================= */
+.notif-sub-dropdown {
+    display: none;
+    background: #f8fafc;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.notif-sub-dropdown.show {
+    display: block;
+}
+
+.notif-sub-dropdown::-webkit-scrollbar{
+    width:5px;
+}
+
+.notif-sub-dropdown::-webkit-scrollbar-thumb{
+    background:#888;
+    border-radius:10px;
+}
+
+.notif-item-link{
+    text-decoration:none;
+    color:inherit;
+    display:block;
+}
+
+.notif-item-link:hover .notif-item{
+    background:#e5e7eb;
+}
+
+.notif-item-link:hover .notif-item.unread{
+    background:#dbeafe;
+}
+
+.notif-item{
+    padding:10px 15px 10px 35px;
+    border-bottom:1px solid #e5e7eb;
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    transition:background 0.2s;
+}
+
+.notif-item.unread{
+    background:#f0f7ff;
+}
+
+.notif-item.read{
+    opacity:0.7;
+}
+
+.notif-item .notif-icon{
+    font-size:14px;
+    min-width:20px;
+    margin-top:1px;
+}
+
+.notif-item .notif-content{
+    flex:1;
+}
+
+.notif-item .notif-title{
+    font-size:13px;
+    font-weight:600;
+    color:#111;
+}
+
+.notif-item .notif-message{
+    font-size:12px;
+    color:#555;
+    line-height:1.3;
+    margin-top:1px;
+}
+
+.notif-item .notif-time{
+    font-size:10px;
+    color:#999;
+    margin-top:2px;
+    display:block;
+}
+
+.notif-empty-sub{
+    padding:20px;
+    text-align:center;
+    color:#999;
+    font-size:13px;
+}
+
+.notif-empty-sub i{
+    font-size:24px;
+    display:block;
+    margin-bottom:8px;
+    color:#d1d5db;
+}
+
+/* ================= NOTIFICATION BADGE ON MENU ITEM ================= */
+.notif-badge-icon {
+    position: relative;
+}
+
+.notif-badge-icon .badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #dc2626;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Fix for larger numbers */
+.notif-badge-icon .badge.badge-large {
+    min-width: 20px;
+    padding: 2px 5px;
 }
 
 /* ================= RESPONSIVE ================= */
@@ -329,8 +337,8 @@ $base_path = "/Digital_suggestion_box/dashboard/";
         padding:15px;
     }
     
-    .notif-dropdown{
-        width:300px;
+    .profile-dropdown{
+        width:280px;
         right:-10px;
     }
     
@@ -340,8 +348,8 @@ $base_path = "/Digital_suggestion_box/dashboard/";
 }
 
 @media(max-width:600px){
-    .notif-dropdown{
-        width:280px;
+    .profile-dropdown{
+        width:260px;
         right:-20px;
     }
     
@@ -362,80 +370,10 @@ $base_path = "/Digital_suggestion_box/dashboard/";
 
     <div class="right">
 
-        <!-- NOTIFICATIONS -->
-        <div class="notif-wrapper">
-
-            <button class="notif-btn" id="notifBtn">
-                <i class="fas fa-bell"></i>
-                <?php if(isset($unread_count) && $unread_count > 0){ ?>
-                    <span class="notif-badge"><?=$unread_count?></span>
-                <?php } ?>
-            </button>
-
-            <div id="notifDropdown" class="notif-dropdown">
-
-                <div class="notif-header">
-                    <span><i class="fas fa-bell"></i> Notifications (<?=$unread_count?> unread)</span>
-                    <?php if(isset($unread_count) && $unread_count > 0){ ?>
-                        <a href="<?=$base_path?>mark_all_read.php" class="mark-all">
-                            Mark all as read
-                        </a>
-                    <?php } ?>
-                </div>
-
-                <?php if(isset($notifications) && count($notifications) > 0){ ?>
-                    
-                    <?php foreach($notifications as $notif){ 
-                        $icon = $notif['type'] == 'suggestion_approved' ? 'fa-check-circle' : 
-                                ($notif['type'] == 'suggestion_rejected' ? 'fa-times-circle' : 
-                                ($notif['type'] == 'suggestion_implemented' ? 'fa-check-double' : 
-                                ($notif['type'] == 'new_suggestion' ? 'fa-plus-circle' : 'fa-trash')));
-                        
-                        $color = $notif['type'] == 'suggestion_approved' ? '#16a34a' : 
-                                ($notif['type'] == 'suggestion_rejected' ? '#dc2626' : 
-                                ($notif['type'] == 'suggestion_implemented' ? '#2563eb' : 
-                                ($notif['type'] == 'new_suggestion' ? '#f59e0b' : '#6b7280')));
-                        
-                        $is_read = $notif['is_read'] ? 'read' : 'unread';
-                    ?>
-                        <a href="<?=$base_path?>mark_read.php?id=<?=$notif['notification_id']?>" class="notif-link">
-                            <div class="notif-item <?=$is_read?>">
-                                
-                                <div class="notif-icon">
-                                    <i class="fas <?=$icon?>" style="color:<?=$color?>;"></i>
-                                </div>
-                                
-                                <div class="notif-content">
-                                    <div class="notif-title"><?=htmlspecialchars($notif['title'])?></div>
-                                    <div class="notif-message"><?=htmlspecialchars($notif['message'])?></div>
-                                    <span class="notif-time">
-                                        <?=date('M j, g:i A', strtotime($notif['created_at']))?>
-                                    </span>
-                                </div>
-                                
-                                <?php if(!$notif['is_read']){ ?>
-                                    <span style="background:#2563eb;border-radius:50%;width:8px;height:8px;display:inline-block;min-width:8px;margin-top:5px;"></span>
-                                <?php } ?>
-                            </div>
-                        </a>
-                    <?php } ?>
-                    
-                <?php }else{ ?>
-                    <div class="notif-empty">
-                        <i class="fas fa-bell-slash"></i>
-                        <p>No notifications yet</p>
-                    </div>
-                <?php } ?>
-
-            </div>
-
-        </div>
-
-        <!-- PROFILE -->
+        <!-- PROFILE WITH NOTIFICATIONS INSIDE -->
         <div class="profile-wrapper">
 
             <div id="profileBtn">
-
                 <?php if(!empty($profile_picture)){ ?>
                     <img src="<?=htmlspecialchars($img)?>" class="profile-image" alt="Profile">
                 <?php }else{ ?>
@@ -443,28 +381,98 @@ $base_path = "/Digital_suggestion_box/dashboard/";
                         <?=strtoupper(substr($fullname,0,1))?>
                     </div>
                 <?php } ?>
-
             </div>
 
-            <!-- DROPDOWN -->
+            <!-- DROPDOWN WITH NOTIFICATIONS -->
             <div id="profileDropdown" class="profile-dropdown">
 
+                <!-- PROFILE INFO -->
                 <div class="profile-info">
                     <b><?=htmlspecialchars($fullname)?></b>
                     <small><?=htmlspecialchars($role)?></small>
                 </div>
 
-                <a href="/Digital_suggestion_box/view.php">
-                    <i class="fas fa-user"></i> My Profile
-                </a>
+                <!-- MENU ITEMS -->
+                <div class="dropdown-menu">
+                    <!-- My Profile -->
+                    <a href="/Digital_suggestion_box/view.php">
+                        <i class="fas fa-user"></i> My Profile
+                    </a>
 
-                <a href="/Digital_suggestion_box/edit_profile.php">
-                    <i class="fas fa-gear"></i> Settings
-                </a>
+                    <!-- Settings -->
+                    <a href="/Digital_suggestion_box/edit_profile.php">
+                        <i class="fas fa-gear"></i> Settings
+                    </a>
 
-                <a href="/Digital_suggestion_box/dashboard/logout.php">
-                    <i class="fas fa-right-from-bracket"></i> Logout
-                </a>
+                    <!-- Notifications (with sub-dropdown) -->
+                    <a href="#" id="notifToggle" class="notif-badge-icon">
+                        <i class="fas fa-bell"></i> Notifications
+                        <?php if(isset($unread_count) && $unread_count > 0){ ?>
+                            <span class="badge <?=($unread_count > 9) ? 'badge-large' : ''?>"><?=$unread_count?></span>
+                        <?php } ?>
+                        <i class="fas fa-chevron-right" style="margin-left:auto;font-size:11px;color:#999;"></i>
+                    </a>
+                    
+                    <!-- Notification Sub-Dropdown -->
+                    <div id="notifSubDropdown" class="notif-sub-dropdown">
+                        <?php if(isset($notifications) && count($notifications) > 0){ ?>
+                            
+                            <?php foreach($notifications as $notif){ 
+                                $icon = $notif['type'] == 'suggestion_approved' ? 'fa-check-circle' : 
+                                        ($notif['type'] == 'suggestion_rejected' ? 'fa-times-circle' : 
+                                        ($notif['type'] == 'suggestion_implemented' ? 'fa-check-double' : 
+                                        ($notif['type'] == 'new_suggestion' ? 'fa-plus-circle' : 'fa-trash')));
+                                
+                                $color = $notif['type'] == 'suggestion_approved' ? '#16a34a' : 
+                                        ($notif['type'] == 'suggestion_rejected' ? '#dc2626' : 
+                                        ($notif['type'] == 'suggestion_implemented' ? '#2563eb' : 
+                                        ($notif['type'] == 'new_suggestion' ? '#f59e0b' : '#6b7280')));
+                                
+                                $is_read = $notif['is_read'] ? 'read' : 'unread';
+                            ?>
+                                <a href="<?=$base_path?>mark_read.php?id=<?=$notif['notification_id']?>" class="notif-item-link">
+                                    <div class="notif-item <?=$is_read?>">
+                                        
+                                        <div class="notif-icon">
+                                            <i class="fas <?=$icon?>" style="color:<?=$color?>;"></i>
+                                        </div>
+                                        
+                                        <div class="notif-content">
+                                            <div class="notif-title"><?=htmlspecialchars($notif['title'])?></div>
+                                            <div class="notif-message"><?=htmlspecialchars($notif['message'])?></div>
+                                            <span class="notif-time">
+                                                <?=date('M j, g:i A', strtotime($notif['created_at']))?>
+                                            </span>
+                                        </div>
+                                        
+                                        <?php if(!$notif['is_read']){ ?>
+                                            <span style="background:#2563eb;border-radius:50%;width:6px;height:6px;display:inline-block;min-width:6px;margin-top:5px;"></span>
+                                        <?php } ?>
+                                    </div>
+                                </a>
+                            <?php } ?>
+                            
+                            <?php if(isset($unread_count) && $unread_count > 0){ ?>
+                                <div style="padding:8px 15px;text-align:center;background:#f8fafc;border-top:1px solid #e5e7eb;">
+                                    <a href="<?=$base_path?>mark_all_read.php" style="color:#1e3a8a;font-size:12px;text-decoration:none;">
+                                        <i class="fas fa-check-double"></i> Mark all as read
+                                    </a>
+                                </div>
+                            <?php } ?>
+                            
+                        <?php }else{ ?>
+                            <div class="notif-empty-sub">
+                                <i class="fas fa-bell-slash"></i>
+                                <p>No notifications yet</p>
+                            </div>
+                        <?php } ?>
+                    </div>
+
+                    <!-- Logout -->
+                    <a href="/Digital_suggestion_box/dashboard/logout.php" class="logout">
+                        <i class="fas fa-right-from-bracket"></i> Logout
+                    </a>
+                </div>
 
             </div>
 
@@ -476,39 +484,55 @@ $base_path = "/Digital_suggestion_box/dashboard/";
 
 <script>
 
-/* ================= TOGGLE DROPDOWNS ================= */
+/* ================= TOGGLE DROPDOWN ================= */
 document.addEventListener("DOMContentLoaded", function(){
 
 const profileBtn = document.getElementById("profileBtn");
 const profileDropdown = document.getElementById("profileDropdown");
-
-const notifBtn = document.getElementById("notifBtn");
-const notifDropdown = document.getElementById("notifDropdown");
+const notifToggle = document.getElementById("notifToggle");
+const notifSubDropdown = document.getElementById("notifSubDropdown");
 
 /* PROFILE TOGGLE */
 if(profileBtn){
 profileBtn.addEventListener("click", function(e){
     e.stopPropagation();
-    profileDropdown.style.display =
-        (profileDropdown.style.display === "block") ? "none" : "block";
-    if(notifDropdown) notifDropdown.style.display = "none";
+    if (profileDropdown.style.display === "block") {
+        profileDropdown.style.display = "none";
+        notifSubDropdown.classList.remove("show");
+    } else {
+        profileDropdown.style.display = "block";
+    }
 });
 }
 
-/* NOTIF TOGGLE */
-if(notifBtn){
-notifBtn.addEventListener("click", function(e){
+/* NOTIFICATIONS TOGGLE */
+if(notifToggle){
+notifToggle.addEventListener("click", function(e){
+    e.preventDefault();
     e.stopPropagation();
-    notifDropdown.style.display =
-        (notifDropdown.style.display === "block") ? "none" : "block";
-    if(profileDropdown) profileDropdown.style.display = "none";
+    notifSubDropdown.classList.toggle("show");
+    
+    // Rotate chevron
+    const chevron = this.querySelector('.fa-chevron-right');
+    if(chevron) {
+        chevron.style.transform = notifSubDropdown.classList.contains("show") ? "rotate(90deg)" : "rotate(0deg)";
+        chevron.style.transition = "transform 0.3s";
+    }
 });
 }
 
 /* CLOSE OUTSIDE */
-window.addEventListener("click", function(){
-    if(profileDropdown) profileDropdown.style.display = "none";
-    if(notifDropdown) notifDropdown.style.display = "none";
+window.addEventListener("click", function(e){
+    if(profileDropdown && !profileDropdown.contains(e.target) && e.target !== profileBtn && !profileBtn.contains(e.target)){
+        profileDropdown.style.display = "none";
+        if(notifSubDropdown) {
+            notifSubDropdown.classList.remove("show");
+            const chevron = document.querySelector('.fa-chevron-right');
+            if(chevron) {
+                chevron.style.transform = "rotate(0deg)";
+            }
+        }
+    }
 });
 
 });

@@ -335,6 +335,7 @@ body{
 </div>
 
 </div>
+<?php include("../footer/footer.php"); ?>
 
 </body>
 

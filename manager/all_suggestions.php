@@ -6,121 +6,118 @@ error_reporting(E_ALL);
 ini_set('display_errors',1);
 
 if(!isset($_SESSION['user_id']) || $_SESSION['role']!='suggestion_manager'){
-header("Location: ../login.php");
-exit();
+    header("Location: ../login.php");
+    exit();
 }
 
 /* ================= ACTIONS WITH NOTIFICATIONS ================= */
 
 if(isset($_GET['approve'])){
-$id=intval($_GET['approve']);
+    $id=intval($_GET['approve']);
 
-// Get suggestion owner and title
-$q=$conn->prepare("SELECT user_id, title FROM suggestions WHERE suggestion_id=?");
-$q->bind_param("i",$id);
-$q->execute();
-$owner=$q->get_result()->fetch_assoc();
+    $q=$conn->prepare("SELECT user_id, title FROM suggestions WHERE suggestion_id=?");
+    $q->bind_param("i",$id);
+    $q->execute();
+    $owner=$q->get_result()->fetch_assoc();
 
-if($owner){
-    $user_id = $owner['user_id'];
-    $suggestion_title = $owner['title'];
-    
-    // Update status
-    $conn->query("UPDATE suggestions SET status='approved' WHERE suggestion_id=$id");
-    
-    // Send notification
-    $title = "Suggestion Approved";
-    $msg = "Your suggestion '$suggestion_title' has been approved.";
-    $type = "suggestion_approved";
-    
-    $n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
-    $n->bind_param("isss",$user_id,$title,$msg,$type);
-    $n->execute();
-}
+    if($owner){
+        $user_id = $owner['user_id'];
+        $suggestion_title = $owner['title'];
+        
+        $conn->query("UPDATE suggestions SET status='approved' WHERE suggestion_id=$id");
+        
+        $title = "Suggestion Approved";
+        $msg = "Your suggestion '$suggestion_title' has been approved.";
+        $type = "suggestion_approved";
+        
+        $n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
+        $n->bind_param("isss",$user_id,$title,$msg,$type);
+        $n->execute();
+    }
 
-header("Location: all_suggestions.php?msg=approved");
-exit();
+    header("Location: all_suggestions.php?msg=approved");
+    exit();
 }
 
 if(isset($_GET['reject'])){
-$id=intval($_GET['reject']);
+    $id=intval($_GET['reject']);
 
-$q=$conn->prepare("SELECT user_id, title FROM suggestions WHERE suggestion_id=?");
-$q->bind_param("i",$id);
-$q->execute();
-$owner=$q->get_result()->fetch_assoc();
+    $q=$conn->prepare("SELECT user_id, title FROM suggestions WHERE suggestion_id=?");
+    $q->bind_param("i",$id);
+    $q->execute();
+    $owner=$q->get_result()->fetch_assoc();
 
-if($owner){
-    $user_id = $owner['user_id'];
-    $suggestion_title = $owner['title'];
-    
-    $conn->query("UPDATE suggestions SET status='rejected' WHERE suggestion_id=$id");
-    
-    $title = "Suggestion Rejected";
-    $msg = "Your suggestion '$suggestion_title' has been rejected.";
-    $type = "suggestion_rejected";
-    
-    $n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
-    $n->bind_param("isss",$user_id,$title,$msg,$type);
-    $n->execute();
-}
+    if($owner){
+        $user_id = $owner['user_id'];
+        $suggestion_title = $owner['title'];
+        
+        $conn->query("UPDATE suggestions SET status='rejected' WHERE suggestion_id=$id");
+        
+        $title = "Suggestion Rejected";
+        $msg = "Your suggestion '$suggestion_title' has been rejected.";
+        $type = "suggestion_rejected";
+        
+        $n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
+        $n->bind_param("isss",$user_id,$title,$msg,$type);
+        $n->execute();
+    }
 
-header("Location: all_suggestions.php?msg=rejected");
-exit();
+    header("Location: all_suggestions.php?msg=rejected");
+    exit();
 }
 
 if(isset($_GET['implement'])){
-$id=intval($_GET['implement']);
+    $id=intval($_GET['implement']);
 
-$q=$conn->prepare("SELECT user_id, title FROM suggestions WHERE suggestion_id=?");
-$q->bind_param("i",$id);
-$q->execute();
-$owner=$q->get_result()->fetch_assoc();
+    $q=$conn->prepare("SELECT user_id, title FROM suggestions WHERE suggestion_id=?");
+    $q->bind_param("i",$id);
+    $q->execute();
+    $owner=$q->get_result()->fetch_assoc();
 
-if($owner){
-    $user_id = $owner['user_id'];
-    $suggestion_title = $owner['title'];
-    
-    $conn->query("UPDATE suggestions SET status='implemented' WHERE suggestion_id=$id");
-    
-    $title = "Suggestion Implemented";
-    $msg = "Your suggestion '$suggestion_title' has been implemented.";
-    $type = "suggestion_implemented";
-    
-    $n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
-    $n->bind_param("isss",$user_id,$title,$msg,$type);
-    $n->execute();
-}
+    if($owner){
+        $user_id = $owner['user_id'];
+        $suggestion_title = $owner['title'];
+        
+        $conn->query("UPDATE suggestions SET status='implemented' WHERE suggestion_id=$id");
+        
+        $title = "Suggestion Implemented";
+        $msg = "Your suggestion '$suggestion_title' has been implemented.";
+        $type = "suggestion_implemented";
+        
+        $n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
+        $n->bind_param("isss",$user_id,$title,$msg,$type);
+        $n->execute();
+    }
 
-header("Location: all_suggestions.php?msg=implemented");
-exit();
+    header("Location: all_suggestions.php?msg=implemented");
+    exit();
 }
 
 if(isset($_GET['delete'])){
-$id=intval($_GET['delete']);
+    $id=intval($_GET['delete']);
 
-$q=$conn->prepare("SELECT user_id, title FROM suggestions WHERE suggestion_id=?");
-$q->bind_param("i",$id);
-$q->execute();
-$owner=$q->get_result()->fetch_assoc();
+    $q=$conn->prepare("SELECT user_id, title FROM suggestions WHERE suggestion_id=?");
+    $q->bind_param("i",$id);
+    $q->execute();
+    $owner=$q->get_result()->fetch_assoc();
 
-if($owner){
-    $user_id = $owner['user_id'];
-    $suggestion_title = $owner['title'];
-    
-    $conn->query("DELETE FROM suggestions WHERE suggestion_id=$id");
-    
-    $title = "Suggestion Deleted";
-    $msg = "Your suggestion '$suggestion_title' was deleted.";
-    $type = "suggestion_deleted";
-    
-    $n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
-    $n->bind_param("isss",$user_id,$title,$msg,$type);
-    $n->execute();
-}
+    if($owner){
+        $user_id = $owner['user_id'];
+        $suggestion_title = $owner['title'];
+        
+        $conn->query("DELETE FROM suggestions WHERE suggestion_id=$id");
+        
+        $title = "Suggestion Deleted";
+        $msg = "Your suggestion '$suggestion_title' was deleted.";
+        $type = "suggestion_deleted";
+        
+        $n=$conn->prepare("INSERT INTO notifications(user_id,title,message,type,is_read,created_at)VALUES(?,?,?,?,0,NOW())");
+        $n->bind_param("isss",$user_id,$title,$msg,$type);
+        $n->execute();
+    }
 
-header("Location: all_suggestions.php?msg=deleted");
-exit();
+    header("Location: all_suggestions.php?msg=deleted");
+    exit();
 }
 
 /* FILTERS */
@@ -146,32 +143,29 @@ WHERE 1=1
 $params=[];
 $types="";
 
-/* STATUS FILTER */
 if($status!=""){
-$sql.=" AND suggestions.status=?";
-$params[]=$status;
-$types.="s";
+    $sql.=" AND suggestions.status=?";
+    $params[]=$status;
+    $types.="s";
 }
 
-/* SEARCH */
 if($search!=""){
-$sql.=" AND (
-    suggestions.message LIKE ? 
-    OR suggestions.title LIKE ? 
-    OR users.full_name LIKE ?
-)";
-$value="%$search%";
-$params[]=$value;
-$params[]=$value;
-$params[]=$value;
-$types.="sss";
+    $sql.=" AND (
+        suggestions.message LIKE ? 
+        OR suggestions.title LIKE ? 
+        OR users.full_name LIKE ?
+    )";
+    $value="%$search%";
+    $params[]=$value;
+    $params[]=$value;
+    $params[]=$value;
+    $types.="sss";
 }
 
-/* CATEGORY */
 if($category!=""){
-$sql.=" AND suggestions.category_id=?";
-$params[]=$category;
-$types.="i";
+    $sql.=" AND suggestions.category_id=?";
+    $params[]=$category;
+    $types.="i";
 }
 
 $sql.=" ORDER BY suggestions.suggestion_id DESC";
@@ -179,7 +173,7 @@ $sql.=" ORDER BY suggestions.suggestion_id DESC";
 $stmt=$conn->prepare($sql);
 
 if($params){
-$stmt->bind_param($types,...$params);
+    $stmt->bind_param($types,...$params);
 }
 
 $stmt->execute();
@@ -193,85 +187,80 @@ $categories=$conn->query("SELECT * FROM categories ORDER BY category_name");
 <head>
 <title>All Suggestions</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
 body{
-margin:0;
-font-family:Segoe UI;
-background:linear-gradient(135deg,#f4f7fc,#eef2ff);
-color:#111827;
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:#f8fafc;
+    color:#1e293b;
 }
 
 .content{
-margin-left:250px;
-padding:30px;
-padding-top:90px;
-}
-
-h3{
-font-size:22px;
-font-weight:700;
-margin-bottom:20px;
-color:#1e3a8a;
+    margin-left:250px;
+    padding:30px;
+    padding-top:100px;
 }
 
 .card{
-background:#ffffff;
-border-radius:16px;
-padding:20px;
-box-shadow:0 10px 25px rgba(0,0,0,0.08);
-margin-bottom:20px;
-border:1px solid #e5e7eb;
+    background:white;
+    padding:25px;
+    border-radius:16px;
+    border:1px solid #e2e8f0;
+    box-shadow:0 4px 12px rgba(0,0,0,.06);
+    margin-bottom:25px;
+}
+
+h3{
+    margin-top:0;
+    color:#2563eb;
+    display:flex;
+    gap:10px;
+    align-items:center;
 }
 
 .filter-box{
-display:grid;
-grid-template-columns:2fr 1fr 1fr 0.8fr;
-gap:12px;
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr 0.8fr;
+    gap:12px;
 }
 
 .form-control{
-padding:10px;
-border-radius:10px;
-border:1px solid #d1d5db;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #cbd5e1;
 }
 
-.table thead{
-background:linear-gradient(135deg,#1e3a8a,#2563eb);
-color:white;
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
 }
 
-.table td{
-padding:14px;
-border-bottom:1px solid #e5e7eb;
+th{
+    background:#2563eb;
+    color:white;
+    padding:14px;
+    text-align:left;
 }
 
-.vote-box{
-display:inline-flex;
-align-items:center;
-gap:6px;
-background:linear-gradient(135deg,#dbeafe,#bfdbfe);
-color:#1e3a8a;
-padding:6px 12px;
-border-radius:20px;
-font-weight:700;
-margin-right:6px;
+td{
+    padding:14px;
+    border-bottom:1px solid #e2e8f0;
 }
 
-.vote-disagree{
-background:linear-gradient(135deg,#fee2e2,#fecaca);
-color:#991b1b;
+tr:hover{
+    background:#f8fafc;
 }
 
 .status-badge{
-padding:6px 12px;
-border-radius:999px;
-font-size:12px;
-font-weight:700;
-display:inline-block;
-text-transform:capitalize;
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+    display:inline-block;
+    text-transform:capitalize;
 }
 
 .approved{background:#dcfce7;color:#166534;}
@@ -280,29 +269,29 @@ text-transform:capitalize;
 .implemented{background:#dbeafe;color:#1e40af;}
 
 .attach-btn{
-display:inline-block;
-padding:6px 10px;
-border-radius:8px;
-background:#111827;
-color:white;
-text-decoration:none;
-font-size:12px;
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:8px;
+    background:#111827;
+    color:white;
+    text-decoration:none;
+    font-size:12px;
 }
 
 .attach-empty{
-color:#94a3b8;
-font-size:13px;
+    color:#94a3b8;
+    font-size:13px;
 }
 
 .btn-action{
-width:36px;
-height:36px;
-display:inline-flex;
-align-items:center;
-justify-content:center;
-border-radius:10px;
-margin-right:5px;
-text-decoration:none;
+    width:36px;
+    height:36px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    margin-right:5px;
+    text-decoration:none;
 }
 
 .btn-approve{background:#22c55e;color:white;}
@@ -310,21 +299,23 @@ text-decoration:none;
 .btn-delete{background:#111827;color:white;}
 .btn-implement{background:#3b82f6;color:white;}
 
-/* Alert messages */
 .alert-msg{
-padding:12px 20px;
-border-radius:8px;
-margin-bottom:15px;
-display:flex;
-align-items:center;
-gap:10px;
+    padding:12px 20px;
+    border-radius:8px;
+    margin-bottom:15px;
+    display:flex;
+    align-items:center;
+    gap:10px;
 }
 .alert-success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;}
-.alert-error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;}
 
 @media(max-width:900px){
-.content{margin-left:0;padding:15px}
-.filter-box{grid-template-columns:1fr}
+    .content{
+        margin-left:0;
+    }
+    .filter-box{
+        grid-template-columns:1fr;
+    }
 }
 </style>
 </head>
@@ -336,13 +327,11 @@ gap:10px;
 
 <div class="content">
 
-<h3>All Suggestions</h3>
+<h3><i class="fas fa-list"></i> All Suggestions</h3>
 
-<!-- ================= ALERT MESSAGES ================= -->
 <?php if(isset($_GET['msg'])): 
     $msg = $_GET['msg'];
     $text = '';
-    $icon = 'fa-check-circle';
     
     if($msg == 'approved') {
         $text = '✅ Suggestion approved successfully! Notification sent to suggester.';
@@ -355,7 +344,7 @@ gap:10px;
     }
 ?>
 <div class="alert-msg alert-success">
-    <i class="fas <?=$icon?>"></i> <?=$text?>
+    <i class="fas fa-check-circle"></i> <?=$text?>
 </div>
 <?php endif; ?>
 
@@ -385,7 +374,7 @@ gap:10px;
 </div>
 
 <div class="card">
-<table class="table table-hover">
+<table>
 
 <thead>
 <tr>
@@ -394,7 +383,6 @@ gap:10px;
 <th>Category</th>
 <th>Message</th>
 <th>Attachment</th>
-<th>Votes</th>
 <th>Status</th>
 <th>Action</th>
 </tr>
@@ -421,18 +409,6 @@ gap:10px;
 </td>
 
 <td>
-<?php
-$id = $row['suggestion_id'];
-
-$agree = $conn->query("SELECT COUNT(*) c FROM votes WHERE suggestion_id=$id AND response='agree'")->fetch_assoc()['c'] ?? 0;
-$disagree = $conn->query("SELECT COUNT(*) c FROM votes WHERE suggestion_id=$id AND response='disagree'")->fetch_assoc()['c'] ?? 0;
-?>
-
-<span class="vote-box"><i class="fas fa-thumbs-up"></i> <?=$agree?></span>
-<span class="vote-box vote-disagree"><i class="fas fa-thumbs-down"></i> <?=$disagree?></span>
-</td>
-
-<td>
 <span class="status-badge <?=$row['status']?>">
 <?=$row['status']?>
 </span>
@@ -454,6 +430,8 @@ $disagree = $conn->query("SELECT COUNT(*) c FROM votes WHERE suggestion_id=$id A
 </div>
 
 </div>
+
+<?php include("../footer/footer.php"); ?>
 
 </body>
 </html>

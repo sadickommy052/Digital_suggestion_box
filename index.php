@@ -22,6 +22,13 @@
 body{
     background:#f4f6f9;
     color:#111827;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
+main{
+    flex:1;
 }
 
 /* ================= NAV ================= */
@@ -45,37 +52,6 @@ nav{
     margin-right:8px;
 }
 
-.nav-btns{
-    display:flex;
-    gap:12px;
-}
-
-.nav-btns a{
-    text-decoration:none;
-    padding:10px 20px;
-    border-radius:8px;
-    font-weight:600;
-}
-
-.login{
-    border:1px solid #fff;
-    color:#fff;
-}
-
-.login:hover{
-    background:#fff;
-    color:#111827;
-}
-
-.register{
-    background:#1e3a8a;
-    color:#fff;
-}
-
-.register:hover{
-    background:#1e40af;
-}
-
 /* ================= HERO ================= */
 
 .hero{
@@ -89,6 +65,7 @@ nav{
 }
 
 /* LEFT TEXT */
+
 .hero-left{
     flex:1;
 }
@@ -98,7 +75,6 @@ nav{
     margin-bottom:15px;
 }
 
-/* 🔥 BOLD PARAGRAPHS */
 .hero-left p{
     color:#111827;
     line-height:1.8;
@@ -107,22 +83,8 @@ nav{
     font-weight:bold;
 }
 
-/* BUTTON */
-.hero-left a{
-    display:inline-block;
-    background:#111827;
-    color:#fff;
-    padding:12px 25px;
-    border-radius:8px;
-    text-decoration:none;
-    margin-top:10px;
-}
+/* RIGHT LOGIN */
 
-.hero-left a:hover{
-    background:#1f2937;
-}
-
-/* RIGHT IMAGE (RESIZED FIX) */
 .hero-right{
     flex:1;
     display:flex;
@@ -130,24 +92,60 @@ nav{
     align-items:center;
 }
 
-.hero-right img{
+.login-container{
     width:100%;
-    max-width:250px;   /* 🔥 resized smaller */
-    height:auto;
+    max-width:400px;
+    background:#fff;
+    padding:30px;
     border-radius:18px;
     box-shadow:0 15px 30px rgba(0,0,0,0.18);
-    object-fit:cover;
-  
 }
 
-/* ================= FOOTER ================= */
+.login-container h2{
+    text-align:center;
+    margin-bottom:20px;
+    color:#111827;
+}
 
-footer{
-    margin-top:100px;
+.login-container input{
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:15px;
+}
+
+.login-container button{
+    width:100%;
+    padding:12px;
     background:#111827;
     color:#fff;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.login-container button:hover{
+    background:#1f2937;
+}
+
+.register-link{
     text-align:center;
-    padding:10px;
+    margin-top:15px;
+    font-size:14px;
+    color:#555;
+}
+
+.register-link a{
+    color:#1e3a8a;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.register-link a:hover{
+    text-decoration:underline;
 }
 
 /* ================= RESPONSIVE ================= */
@@ -164,6 +162,10 @@ footer{
         text-align:center;
     }
 
+    .login-container{
+        margin-top:20px;
+    }
+
 }
 
 </style>
@@ -175,44 +177,60 @@ footer{
 <!-- ================= NAV ================= -->
 
 <nav>
-
-<div class="logo">
-<i class="fas fa-lightbulb"></i> Digital Suggestion Box
-</div>
-
+    <div class="logo">
+        <i class="fas fa-lightbulb"></i> Digital Suggestion Box
+    </div>
 </nav>
+
+<main>
 
 <!-- ================= HERO ================= -->
 
 <section class="hero">
 
-<div class="hero-left">
+    <div class="hero-left">
 
-<h1>Digital Suggestion box system</h1>
+        <h1>Digital Suggestion Box System</h1>
 
-<p>
-A Digital Suggestion Box System is a web-based platform that allows users to easily submit ideas, feedback, and complaints in a secure and organized way. Instead of using physical suggestion boxes, everything is done online, making it faster and more efficient for both users and administrators. The system helps organizations collect opinions, review suggestions, and improve services through transparent communication and better decision-making.
-</p>
+        <p>
+            A Digital Suggestion Box System is a web-based platform that allows users to easily submit ideas, feedback, and complaints in a secure and organized way. Instead of using physical suggestion boxes, everything is done online, making it faster and more efficient for both users and administrators. The system helps organizations collect opinions, review suggestions, and improve services through transparent communication and better decision-making.
+        </p>
 
+    </div>
 
-<a href="login.php">Get Started</a>
+    <!-- LOGIN FORM -->
 
-</div>
+    <div class="hero-right">
 
-<div class="hero-right">
+        <div class="login-container">
 
-<!-- IMAGE -->
-<img src="ideas.jpeg" alt="Suggestion Box Image">
+            <h2>Login</h2>
 
-</div>
+            <form action="login.php" method="POST">
+
+                <input type="text" name="username" placeholder="Username" required>
+
+                <input type="password" name="password" placeholder="Password" required>
+
+                <button type="submit">Login</button>
+
+                <p class="register-link">
+                    Don't have an account?
+                    <a href="register.php">Register here</a>
+                </p>
+
+            </form>
+
+        </div>
+
+    </div>
 
 </section>
 
-<!-- ================= FOOTER ================= -->
+</main>
 
-<footer>
-© 2026 Digital Suggestion Box System
-</footer>
+<!-- Footer -->
+<?php include 'footer/footer.php'; ?>
 
 </body>
 </html>

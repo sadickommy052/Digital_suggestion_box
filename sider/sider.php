@@ -9,13 +9,13 @@ $role = $_SESSION['role'] ?? '';
 <style>
 
 .sidebar{
-    width:220px;
-    height:100vh;
+    width:203px;
+    height:calc(100vh - 50px); /* 70px = height ya topbar */
     position:fixed;
-    top:0;
+    top:0px;                  /* Acha nafasi ya topbar */
     left:0;
     background:#111827;
-    padding:15px;
+    padding:30px;
     color:white;
     display:flex;
     flex-direction:column;
@@ -138,7 +138,7 @@ hr{
 
     <!-- PROFILE -->
    <div class="profile">
-    <h4><i class="fas fa-box"></i> Digital Suggestion Box</h4>
+   <h4><i class="fas fa-box"></i> DSBS</h4>
     <small><i class="fas fa-user"></i> suggester</small>
     
     
@@ -202,15 +202,11 @@ hr{
 
     <?php if ($role == 'suggester') { ?>
 
-         <a href="/Digital_suggestion_box/manager/manager_dashboard.php">
+         <a href="/Digital_suggestion_box/dashboard/suggester_dashboard.php">
             <i class="fas fa-gauge-high"></i>
             <span>Dashboard</span>
         </a>
 
-        <a href="/Digital_suggestion_box/dashboard/submit_suggestion.php">
-            <i class="fas fa-pen-to-square"></i>
-            <span>Submit</span>
-        </a>
 
         <a href="/Digital_suggestion_box/dashboard/my_suggestions.php">
             <i class="fas fa-list-check"></i>

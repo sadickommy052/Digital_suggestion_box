@@ -235,6 +235,7 @@ transform:scale(1.03);
 </div>
 
 </div>
+<?php include("../footer/footer.php"); ?>
 
 </body>
 </html>

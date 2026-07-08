@@ -97,22 +97,15 @@ if($rejected_result){ $rejected = $rejected_result->fetch_assoc()['c']; }
 $implemented_result = $conn->query("SELECT COUNT(*) c FROM suggestions WHERE status='implemented'");
 if($implemented_result){ $implemented = $implemented_result->fetch_assoc()['c']; }
 
-/* ================= RECENT ================= */
+/* ================= RECENT (BILA VOTES) ================= */
 $recent = $conn->query("
 SELECT 
     s.*,
     u.full_name,
-    c.category_name,
-
-    SUM(CASE WHEN v.response='agree' THEN 1 ELSE 0 END) AS total_agree,
-    SUM(CASE WHEN v.response='disagree' THEN 1 ELSE 0 END) AS total_disagree
-
+    c.category_name
 FROM suggestions s
 JOIN users u ON u.user_id = s.user_id
 LEFT JOIN categories c ON c.category_id = s.category_id
-LEFT JOIN votes v ON v.suggestion_id = s.suggestion_id
-
-GROUP BY s.suggestion_id
 ORDER BY s.suggestion_id DESC
 LIMIT 10
 ");
@@ -203,14 +196,6 @@ display:inline-block;
 .pending{background:#fef3c7;color:#92400e;}
 .rejected{background:#fee2e2;color:#991b1b;}
 .implemented{background:#dbeafe;color:#1e40af;}
-
-.vote-box{
-display:flex;
-gap:15px;
-font-size:13px;
-color:#374151;
-align-items:center;
-}
 </style>
 </head>
 
@@ -247,11 +232,6 @@ align-items:center;
 
 <div><?=htmlspecialchars($r['message'])?></div>
 
-<div class="vote-box">
-    <span><i class="fas fa-thumbs-up"></i> <?=$r['total_agree']?></span>
-    <span><i class="fas fa-thumbs-down"></i> <?=$r['total_disagree']?></span>
-</div>
-
 <span class="status <?=$r['status']?>">
 <?=ucfirst($r['status'])?>
 </span>
@@ -270,6 +250,6 @@ align-items:center;
 </div>
 
 </div>
-
+<?php include("../footer/footer.php"); ?>
 </body>
 </html>
