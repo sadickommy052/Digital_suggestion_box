@@ -1,6 +1,8 @@
 <?php
 session_start();
 include("config/db.php");
+include("config/functions.php"); // ← IMEONGEZWA
+
 
 // ================= WEKA TIMEZONE =================
 date_default_timezone_set('Africa/Dar_es_Salaam');
@@ -115,6 +117,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt->bind_param("ssssss", $full_name, $email, $hash, $role, $status, $profile_picture);
 
                 if ($stmt->execute()) {
+                    
+                    // =====================
+                    // REKODI USER REGISTRATION
+                    // =====================
+                    logActivity(
+                        0, // No user_id yet, but we can use 0
+                        $full_name,
+                        'User Registered',
+                        'New user registered: ' . $full_name . ' (Email: ' . $email . ')'
+                    );
+                    
                     header("Location: login.php");
                     exit();
                 } else {
@@ -134,8 +147,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <style>
 body{
     margin:0;
-    font-family:Segoe UI, sans-serif;
-    background:#f4f7fc;
+    font-family:'Segoe UI', sans-serif;
+    background:#f8fafc;
     height:100vh;
     display:flex;
     justify-content:center;
@@ -146,9 +159,9 @@ body{
     width:420px;
     background:#ffffff;
     padding:25px;
-    border-radius:12px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.08);
-    border:1px solid #e5e7eb;
+    border-radius:16px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+    border:1px solid #e2e8f0;
 }
 
 h2{
@@ -167,20 +180,22 @@ input,button{
 }
 
 input{
-    border:1px solid #d1d5db;
+    border:1px solid #cbd5e1;
     outline:none;
     transition:0.2s;
+    background:#f8fafc;
 }
 
 input:focus{
     border-color:#111827;
-    box-shadow:0 0 0 3px rgba(17,24,39,0.15);
+    box-shadow:0 0 0 3px rgba(17,24,39,0.08);
+    background:white;
 }
 
 input[type="file"]{
     padding:10px;
     background:#f8fafc;
-    border:1px dashed #d1d5db;
+    border:1px dashed #cbd5e1;
     cursor:pointer;
 }
 

@@ -5,6 +5,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 include(__DIR__ . "/config/db.php");
+include(__DIR__ . "/config/functions.php"); // ← IMEBADILISHWA NJIA
+
 
 if(!isset($conn)){
     die("Database connection failed. Check db.php");
@@ -121,6 +123,17 @@ if(isset($_POST['update'])){
     }
 
     if(isset($stmt) && $stmt->execute()){
+        
+        // =====================
+        // REKODI PROFILE UPDATE
+        // =====================
+        logActivity(
+            $_SESSION['user_id'],
+            $_SESSION['full_name'],
+            'Profile Updated',
+            'User updated their profile (Name: ' . $new_name . ', Email: ' . $new_email . ')'
+        );
+        
         $message = "Profile updated successfully!";
         $messageType = "success";
         // Update variables to reflect new values
@@ -145,33 +158,29 @@ if(isset($_POST['update'])){
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
+/* ================= NO RESET - USIATHIRI SIDER ================= */
 body{
     margin:0;
-    font-family:'Segoe UI', Arial, sans-serif;
-    background:#f4f6f9;
+    font-family:'Segoe UI',sans-serif;
+    background:#f8fafc;
+    color:#1e293b;
 }
 
 .container{
-    margin-left:220px;
-    padding:100px 30px 30px 30px;
-    min-height:100vh;
+    margin-left:250px;
+    padding:30px;
+    padding-top:100px;
+    min-height:calc(100vh - 180px);
 }
 
 .card{
     max-width:750px;
     margin:auto;
     background:#ffffff;
-    border-radius:12px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.06);
+    border-radius:16px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
     overflow:hidden;
-    border:1px solid #e5e7eb;
+    border:1px solid #e2e8f0;
 }
 
 /* ================= HEADER ================= */
@@ -209,7 +218,7 @@ body{
     text-align:center;
     margin-bottom:25px;
     padding-bottom:25px;
-    border-bottom:1px solid #e5e7eb;
+    border-bottom:1px solid #e2e8f0;
 }
 
 .profile-preview .avatar{
@@ -291,12 +300,12 @@ body{
 
 .form-group input{
     padding:10px 14px;
-    border:1px solid #d1d5db;
+    border:1px solid #cbd5e1;
     border-radius:8px;
     outline:none;
     font-size:14px;
     transition:all 0.2s ease;
-    background:#fafbfc;
+    background:#f8fafc;
 }
 
 .form-group input:focus{
@@ -306,14 +315,14 @@ body{
 }
 
 .form-group input::placeholder{
-    color:#9ca3af;
+    color:#94a3b8;
     font-size:13px;
 }
 
 .form-group input[type="file"]{
     padding:8px 12px;
     background:white;
-    border:1px dashed #d1d5db;
+    border:1px dashed #cbd5e1;
 }
 
 .form-group input[type="file"]:hover{
@@ -361,13 +370,13 @@ body{
 }
 
 .message.success{
-    background:#f0fdf4;
+    background:#dcfce7;
     color:#166534;
     border:1px solid #bbf7d0;
 }
 
 .message.error{
-    background:#fef2f2;
+    background:#fee2e2;
     color:#991b1b;
     border:1px solid #fecaca;
 }

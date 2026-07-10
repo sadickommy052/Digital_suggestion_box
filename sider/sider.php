@@ -10,9 +10,9 @@ $role = $_SESSION['role'] ?? '';
 
 .sidebar{
     width:203px;
-    height:calc(100vh - 50px); /* 70px = height ya topbar */
+    height:calc(100vh - 60px);
     position:fixed;
-    top:0px;                  /* Acha nafasi ya topbar */
+    top:0px;
     left:0;
     background:#111827;
     padding:30px;
@@ -25,8 +25,9 @@ $role = $_SESSION['role'] ?? '';
 .profile{
     text-align:center;
     margin-bottom:20px;
-    padding-bottom:15px;
+    padding:10px 0 15px 0;
     border-bottom:1px solid #374151;
+    width:100%;
 }
 
 .profile h4{
@@ -34,6 +35,15 @@ $role = $_SESSION['role'] ?? '';
     font-size:16px;
     font-weight:600;
     color:#ffffff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+}
+
+.profile h4 i{
+    font-size:18px;
 }
 
 .profile small{
@@ -139,10 +149,7 @@ hr{
     <!-- PROFILE -->
    <div class="profile">
    <h4><i class="fas fa-box"></i> DSBS</h4>
-    <small><i class="fas fa-user"></i> suggester</small>
-    
-    
-    </a>
+   
 </div>
     <!-- MENU -->
     <div class="menu-title">Menu</div>
@@ -169,7 +176,7 @@ hr{
             <span>Activity</span>
         </a>
 
-        <a href="/Digital_suggestion_box/admin/backup_system.php">
+        <a href="/Digital_suggestion_box/admin/backup.php">
             <i class="fas fa-database"></i>
             <span>Backup</span>
         </a>

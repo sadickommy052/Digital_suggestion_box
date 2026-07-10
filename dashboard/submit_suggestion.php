@@ -1,6 +1,8 @@
 <?php
 session_start();
 include("../config/db.php");
+include("../config/functions.php"); // ← IMEONGEZWA
+
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -36,6 +38,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $suggestion_id = $stmt->insert_id;
         $stmt->close();
+
+        // =====================
+        // REKODI SUGGESTION SUBMITTED
+        // =====================
+        logActivity(
+            $_SESSION['user_id'],
+            $_SESSION['full_name'],
+            'Suggestion Submitted',
+            'New suggestion "' . $title . '" submitted (ID: ' . $suggestion_id . ')'
+        );
 
         if (!empty($_FILES['attachment']['name'])) {
 
@@ -125,15 +137,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 body{
     margin:0;
     font-family:'Segoe UI', sans-serif;
-    background:#f4f6f9;
-    color:#111827;
+    background:#f8fafc;
+    color:#1e293b;
 }
 
 /* ================= CONTENT ================= */
 .content{
-    margin-left:220px;
-    padding:100px 30px 30px 30px;
-    min-height:100vh;
+    margin-left:250px;
+    padding:30px;
+    padding-top:100px;
+    min-height:calc(100vh - 180px);
 }
 
 /* ================= CENTER WRAPPER ================= */
@@ -145,9 +158,9 @@ body{
 /* ================= CARD ================= */
 .card{
     background:#ffffff;
-    border:1px solid #e5e7eb;
-    border-radius:12px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.06);
+    border:1px solid #e2e8f0;
+    border-radius:16px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
     overflow:hidden;
 }
 
@@ -193,12 +206,12 @@ input, select, textarea{
     width:100%;
     padding:10px 14px;
     border-radius:8px;
-    border:1px solid #d1d5db;
+    border:1px solid #cbd5e1;
     margin-bottom:18px;
-    background:#fafbfc;
+    background:#f8fafc;
     font-size:14px;
     transition:all 0.2s ease;
-    color:#111827;
+    color:#1e293b;
     box-sizing:border-box;
 }
 
@@ -210,7 +223,7 @@ input:focus, select:focus, textarea:focus{
 }
 
 input::placeholder, textarea::placeholder{
-    color:#9ca3af;
+    color:#94a3b8;
 }
 
 textarea{
@@ -229,7 +242,7 @@ select{
 input[type="file"]{
     padding:8px 12px;
     background:white;
-    border:1px dashed #d1d5db;
+    border:1px dashed #cbd5e1;
     cursor:pointer;
 }
 
@@ -286,19 +299,19 @@ button i{
 }
 
 .success{
-    background:#f0fdf4;
+    background:#dcfce7;
     color:#166534;
     border:1px solid #bbf7d0;
 }
 
 .warning{
-    background:#fffbeb;
+    background:#fef3c7;
     color:#92400e;
     border:1px solid #fde68a;
 }
 
 .danger{
-    background:#fef2f2;
+    background:#fee2e2;
     color:#991b1b;
     border:1px solid #fecaca;
 }
@@ -346,8 +359,8 @@ button i{
 
 <body>
 
-<?php include("../toper/toper.php"); ?>
 <?php include("../sider/sider.php"); ?>
+<?php include("../toper/toper.php"); ?>
 
 <div class="content">
 
@@ -406,6 +419,7 @@ button i{
     </div>
 
 </div>
+
 <?php include("../footer/footer.php"); ?>
 
 </body>

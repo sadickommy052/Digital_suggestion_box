@@ -1,6 +1,8 @@
 <?php
 session_start();
 include("../config/db.php");
+include("../config/functions.php");
+
 
 // Enable error reporting
 error_reporting(E_ALL);
@@ -43,24 +45,68 @@ $user_id=$owner['user_id'];
 
 if(isset($_GET['approve'])){
 $conn->query("UPDATE suggestions SET status='approved' WHERE suggestion_id=$id");
+
+// =====================
+// REKODI APPROVAL
+// =====================
+logActivity(
+    $_SESSION['user_id'],
+    $_SESSION['full_name'],
+    'Suggestion Approved',
+    'Approved suggestion #' . $id
+);
+
 $title="Suggestion Approved";
 $msg="Your suggestion has been approved.";
 $type="suggestion_approved";
 }
 elseif(isset($_GET['reject'])){
 $conn->query("UPDATE suggestions SET status='rejected' WHERE suggestion_id=$id");
+
+// =====================
+// REKODI REJECTION
+// =====================
+logActivity(
+    $_SESSION['user_id'],
+    $_SESSION['full_name'],
+    'Suggestion Rejected',
+    'Rejected suggestion #' . $id
+);
+
 $title="Suggestion Rejected";
 $msg="Your suggestion has been rejected.";
 $type="suggestion_rejected";
 }
 elseif(isset($_GET['implement'])){
 $conn->query("UPDATE suggestions SET status='implemented' WHERE suggestion_id=$id");
+
+// =====================
+// REKODI IMPLEMENTATION
+// =====================
+logActivity(
+    $_SESSION['user_id'],
+    $_SESSION['full_name'],
+    'Suggestion Implemented',
+    'Implemented suggestion #' . $id
+);
+
 $title="Suggestion Implemented";
 $msg="Your suggestion has been implemented.";
 $type="suggestion_implemented";
 }
 else{
 $conn->query("DELETE FROM suggestions WHERE suggestion_id=$id");
+
+// =====================
+// REKODI DELETION
+// =====================
+logActivity(
+    $_SESSION['user_id'],
+    $_SESSION['full_name'],
+    'Suggestion Deleted',
+    'Deleted suggestion #' . $id
+);
+
 $title="Suggestion Deleted";
 $msg="Your suggestion was deleted.";
 $type="suggestion_deleted";
@@ -121,13 +167,16 @@ LIMIT 10
 <style>
 body{
 margin:0;
-font-family:Segoe UI;
-background:#f4f6fb;
+font-family:'Segoe UI',sans-serif;
+background:#f8fafc;
+color:#1e293b;
 }
 
 .content{
-margin-left:200px;
-padding:100px;
+margin-left:250px;
+padding:30px;
+padding-top:100px;
+min-height:calc(100vh - 180px);
 }
 
 .stats{
@@ -142,7 +191,14 @@ background:white;
 padding:18px;
 border-radius:14px;
 text-align:center;
-box-shadow:0 4px 15px rgba(0,0,0,0.08);
+box-shadow:0 4px 12px rgba(0,0,0,0.06);
+border:1px solid #e2e8f0;
+transition:transform 0.2s;
+}
+
+.card:hover{
+transform:translateY(-3px);
+box-shadow:0 8px 25px rgba(0,0,0,0.1);
 }
 
 .card p{font-size:26px;font-weight:bold;margin:10px 0 0;}
@@ -158,7 +214,8 @@ background:white;
 padding:22px;
 border-radius:14px;
 margin-top:20px;
-box-shadow:0 4px 15px rgba(0,0,0,0.08);
+border:1px solid #e2e8f0;
+box-shadow:0 4px 12px rgba(0,0,0,0.06);
 }
 
 .recent-grid{
@@ -171,17 +228,17 @@ gap:15px;
 background:#fff;
 padding:15px;
 border-radius:12px;
+border:1px solid #e2e8f0;
 box-shadow:0 3px 10px rgba(0,0,0,0.06);
 display:flex;
 flex-direction:column;
 gap:10px;
+transition:transform 0.2s;
 }
 
-.preview{
-width:100%;
-height:120px;
-object-fit:cover;
-border-radius:8px;
+.recent-card:hover{
+transform:translateY(-3px);
+box-shadow:0 6px 20px rgba(0,0,0,0.1);
 }
 
 .status{
@@ -196,6 +253,26 @@ display:inline-block;
 .pending{background:#fef3c7;color:#92400e;}
 .rejected{background:#fee2e2;color:#991b1b;}
 .implemented{background:#dbeafe;color:#1e40af;}
+
+@media(max-width:900px){
+    .content{
+        margin-left:0;
+        padding:15px;
+        padding-top:80px;
+    }
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:600px){
+    .stats{
+        grid-template-columns:1fr;
+    }
+    .recent-grid{
+        grid-template-columns:1fr;
+    }
+}
 </style>
 </head>
 
@@ -208,11 +285,11 @@ display:inline-block;
 
 <!-- STATS -->
 <div class="stats">
-<div class="card"><h4>Total</h4><p><?=$total?></p></div>
-<div class="card"><h4>Pending</h4><p><?=$pending?></p></div>
-<div class="card"><h4>Approved</h4><p><?=$approved?></p></div>
-<div class="card"><h4>Rejected</h4><p><?=$rejected?></p></div>
-<div class="card"><h4>Implemented</h4><p><?=$implemented?></p></div>
+<div class="card total"><h4>Total</h4><p><?=$total?></p></div>
+<div class="card pending"><h4>Pending</h4><p><?=$pending?></p></div>
+<div class="card approved"><h4>Approved</h4><p><?=$approved?></p></div>
+<div class="card rejected"><h4>Rejected</h4><p><?=$rejected?></p></div>
+<div class="card implemented"><h4>Implemented</h4><p><?=$implemented?></p></div>
 </div>
 
 <!-- RECENT -->

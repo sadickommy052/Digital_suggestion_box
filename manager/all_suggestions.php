@@ -1,6 +1,7 @@
 <?php
 session_start();
 include("../config/db.php");
+include("../config/functions.php"); // ← IMEONGEZWA
 
 error_reporting(E_ALL);
 ini_set('display_errors',1);
@@ -25,6 +26,16 @@ if(isset($_GET['approve'])){
         $suggestion_title = $owner['title'];
         
         $conn->query("UPDATE suggestions SET status='approved' WHERE suggestion_id=$id");
+        
+        // =====================
+        // REKODI APPROVAL
+        // =====================
+        logActivity(
+            $_SESSION['user_id'],
+            $_SESSION['full_name'],
+            'Suggestion Approved',
+            'Suggestion #' . $id . ' "' . $suggestion_title . '" approved'
+        );
         
         $title = "Suggestion Approved";
         $msg = "Your suggestion '$suggestion_title' has been approved.";
@@ -53,6 +64,16 @@ if(isset($_GET['reject'])){
         
         $conn->query("UPDATE suggestions SET status='rejected' WHERE suggestion_id=$id");
         
+        // =====================
+        // REKODI REJECTION
+        // =====================
+        logActivity(
+            $_SESSION['user_id'],
+            $_SESSION['full_name'],
+            'Suggestion Rejected',
+            'Suggestion #' . $id . ' "' . $suggestion_title . '" rejected'
+        );
+        
         $title = "Suggestion Rejected";
         $msg = "Your suggestion '$suggestion_title' has been rejected.";
         $type = "suggestion_rejected";
@@ -80,6 +101,16 @@ if(isset($_GET['implement'])){
         
         $conn->query("UPDATE suggestions SET status='implemented' WHERE suggestion_id=$id");
         
+        // =====================
+        // REKODI IMPLEMENTATION
+        // =====================
+        logActivity(
+            $_SESSION['user_id'],
+            $_SESSION['full_name'],
+            'Suggestion Implemented',
+            'Suggestion #' . $id . ' "' . $suggestion_title . '" implemented'
+        );
+        
         $title = "Suggestion Implemented";
         $msg = "Your suggestion '$suggestion_title' has been implemented.";
         $type = "suggestion_implemented";
@@ -106,6 +137,16 @@ if(isset($_GET['delete'])){
         $suggestion_title = $owner['title'];
         
         $conn->query("DELETE FROM suggestions WHERE suggestion_id=$id");
+        
+        // =====================
+        // REKODI DELETION
+        // =====================
+        logActivity(
+            $_SESSION['user_id'],
+            $_SESSION['full_name'],
+            'Suggestion Deleted',
+            'Suggestion #' . $id . ' "' . $suggestion_title . '" deleted'
+        );
         
         $title = "Suggestion Deleted";
         $msg = "Your suggestion '$suggestion_title' was deleted.";
@@ -201,6 +242,7 @@ body{
     margin-left:250px;
     padding:30px;
     padding-top:100px;
+    min-height:calc(100vh - 180px);
 }
 
 .card{
@@ -292,12 +334,18 @@ tr:hover{
     border-radius:10px;
     margin-right:5px;
     text-decoration:none;
+    transition:transform 0.2s;
+}
+
+.btn-action:hover{
+    transform:scale(1.1);
 }
 
 .btn-approve{background:#22c55e;color:white;}
 .btn-reject{background:#ef4444;color:white;}
 .btn-delete{background:#111827;color:white;}
 .btn-implement{background:#3b82f6;color:white;}
+.btn-view{background:#8b5cf6;color:white;}
 
 .alert-msg{
     padding:12px 20px;
@@ -309,12 +357,21 @@ tr:hover{
 }
 .alert-success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;}
 
+.action-buttons{
+    display:flex;
+    gap:5px;
+    flex-wrap:wrap;
+}
+
 @media(max-width:900px){
     .content{
         margin-left:0;
     }
     .filter-box{
         grid-template-columns:1fr;
+    }
+    .action-buttons{
+        flex-direction:column;
     }
 }
 </style>
@@ -415,10 +472,18 @@ tr:hover{
 </td>
 
 <td>
-<a href="?approve=<?=$row['suggestion_id']?>" class="btn-action btn-approve" title="Approve"><i class="fas fa-check"></i></a>
-<a href="?reject=<?=$row['suggestion_id']?>" class="btn-action btn-reject" title="Reject"><i class="fas fa-times"></i></a>
-<a href="?implement=<?=$row['suggestion_id']?>" class="btn-action btn-implement" title="Implement"><i class="fas fa-check-double"></i></a>
-<a href="?delete=<?=$row['suggestion_id']?>" class="btn-action btn-delete" title="Delete" onclick="return confirm('Delete this suggestion?')"><i class="fas fa-trash"></i></a>
+    <div class="action-buttons">
+        <?php if($row['status'] == 'pending'): ?>
+            <a href="?approve=<?=$row['suggestion_id']?>" class="btn-action btn-approve" title="Approve"><i class="fas fa-check"></i></a>
+            <a href="?reject=<?=$row['suggestion_id']?>" class="btn-action btn-reject" title="Reject"><i class="fas fa-times"></i></a>
+            <a href="?implement=<?=$row['suggestion_id']?>" class="btn-action btn-implement" title="Implement"><i class="fas fa-check-double"></i></a>
+            <a href="?delete=<?=$row['suggestion_id']?>" class="btn-action btn-delete" title="Delete" onclick="return confirm('Delete this suggestion?')"><i class="fas fa-trash"></i></a>
+        <?php else: ?>
+            <!-- ================= VIEW BUTTON FOR APPROVED/REJECTED/IMPLEMENTED ================= -->
+            <a href="../dashboard/view_suggestion.php?id=<?=$row['suggestion_id']?>" class="btn-action btn-view" title="View Comments"><i class="fas fa-comments"></i></a>
+            <a href="?delete=<?=$row['suggestion_id']?>" class="btn-action btn-delete" title="Delete" onclick="return confirm('Delete this suggestion?')"><i class="fas fa-trash"></i></a>
+        <?php endif; ?>
+    </div>
 </td>
 
 </tr>

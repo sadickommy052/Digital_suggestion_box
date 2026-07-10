@@ -1,6 +1,8 @@
 <?php
 session_start();
 include("config/db.php");
+include("config/functions.php"); // ← IMEONGEZWA
+
 
 $error="";
 
@@ -39,6 +41,15 @@ $_SESSION['full_name']=$user['full_name'];
 $_SESSION['role']=$user['role'];
 $_SESSION['profile_picture']=$user['profile_picture'];
 
+// =====================
+// REKODI LOGIN ACTIVITY
+// =====================
+logActivity(
+    $user['user_id'],
+    $user['full_name'],
+    'User Login',
+    'User logged in successfully from IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'Unknown')
+);
 
 if($user['role']=="admin"){
 
@@ -92,12 +103,12 @@ $stmt->close();
 
 body{
     margin:0;
-    font-family:Segoe UI, sans-serif;
+    font-family:'Segoe UI', sans-serif;
     height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    background:#f4f7fc;
+    background:#f8fafc;
 }
 
 /* LOGIN BOX */
@@ -106,8 +117,8 @@ body{
     background:#ffffff;
     padding:35px;
     border-radius:14px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.08);
-    border:1px solid #e5e7eb;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+    border:1px solid #e2e8f0;
 }
 
 /* TITLE */
@@ -129,14 +140,16 @@ input,button{
 
 /* INPUT STYLE */
 input{
-    border:1px solid #d1d5db;
+    border:1px solid #cbd5e1;
     outline:none;
     transition:0.2s;
+    background:#f8fafc;
 }
 
 input:focus{
     border-color:#111827;
-    box-shadow:0 0 0 3px rgba(17,24,39,0.15);
+    box-shadow:0 0 0 3px rgba(17,24,39,0.08);
+    background:white;
 }
 
 /* BUTTON (SIDEBAR COLOR) */

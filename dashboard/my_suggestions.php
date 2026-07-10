@@ -4,6 +4,8 @@ date_default_timezone_set('Africa/Dar_es_Salaam');
 
 session_start();
 include("../config/db.php");
+include("../config/functions.php");
+
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -51,6 +53,10 @@ if (isset($_GET['delete_suggestion'])) {
 
     $id = (int) $_GET['delete_suggestion'];
 
+    // Get title before deleting
+    $title_query = $conn->query("SELECT title FROM suggestions WHERE suggestion_id = $id");
+    $title = $title_query->fetch_assoc()['title'] ?? 'Unknown';
+
     $att = $conn->prepare("SELECT file_path FROM attachments WHERE suggestion_id = ?");
     $att->bind_param("i", $id);
     $att->execute();
@@ -71,6 +77,16 @@ if (isset($_GET['delete_suggestion'])) {
     $stmt->bind_param("ii", $id, $user_id);
     $stmt->execute();
 
+    // =====================
+    // REKODI SUGGESTION DELETED
+    // =====================
+    logActivity(
+        $_SESSION['user_id'],
+        $_SESSION['full_name'],
+        'Suggestion Deleted',
+        'Deleted suggestion: "' . $title . '" (ID: ' . $id . ')'
+    );
+
     header("Location: my_suggestions.php");
     exit();
 }
@@ -90,6 +106,16 @@ if (isset($_POST['update_suggestion'])) {
     ");
     $stmt->bind_param("ssiii", $title, $desc, $category, $id, $user_id);
     $stmt->execute();
+
+    // =====================
+    // REKODI SUGGESTION UPDATED
+    // =====================
+    logActivity(
+        $_SESSION['user_id'],
+        $_SESSION['full_name'],
+        'Suggestion Updated',
+        'Updated suggestion #' . $id . ': "' . $title . '"'
+    );
 
     if (!empty($_FILES['attachment']['name'])) {
 
@@ -177,7 +203,7 @@ $result = $stmt->get_result();
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
-/* ================= ONLY STYLE CONTENT, NOT SIDER ================= */
+/* ================= RESET - USIATHIRI SIDER ================= */
 body{
     margin:0;
     font-family:'Segoe UI',sans-serif;
@@ -185,11 +211,12 @@ body{
     color:#1e293b;
 }
 
-/* ================= CONTENT - USE SPECIFIC CLASS ================= */
+/* ================= CONTENT ================= */
 .content {
     margin-left: 250px;
     padding: 30px;
     padding-top: 100px;
+    min-height: calc(100vh - 180px);
 }
 
 .card-box{
@@ -209,25 +236,26 @@ h4{
     align-items:center;
 }
 
-table{
+/* ================= TABLE - SPECIFIC KWA CONTENT ================= */
+.card-box table{
     width:100%;
     border-collapse:collapse;
     background:white;
 }
 
-th{
+.card-box th{
     background:#111827;
     color:white;
     padding:14px;
     text-align:left;
 }
 
-td{
+.card-box td{
     padding:14px;
     border-bottom:1px solid #e2e8f0;
 }
 
-tr:hover{
+.card-box tr:hover{
     background:#f8fafc;
 }
 
@@ -360,9 +388,11 @@ tr:hover{
     box-sizing:border-box;
 }
 
+/* ================= SUBMITTED DATE STYLING ================= */
 .submitted-date{
     font-size:13px;
     color:#374151;
+    line-height:1.6;
 }
 
 .submitted-date .date{
@@ -381,13 +411,6 @@ tr:hover{
 
 .submitted-date .time i{
     margin-right:4px;
-}
-
-.submitted-date .day-diff{
-    font-size:11px;
-    color:#dc2626;
-    font-weight:600;
-    margin-top:2px;
 }
 
 .header-actions{
@@ -575,10 +598,6 @@ tr:hover{
                                 <div class="time">
                                     <i class="fas fa-clock"></i>
                                     <?= $time_ago ?>
-                                </div>
-                                <div class="day-diff">
-                                    <i class="fas fa-hourglass-half"></i>
-                                    <?= $day_name ?>, <?= $month_name ?> <?= $day_number ?>, <?= $year ?>
                                 </div>
                             </div>
                         </td>

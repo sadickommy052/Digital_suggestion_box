@@ -15,6 +15,7 @@ if($_SESSION['role'] != 'suggester') {
 }
 
 include("../config/db.php");
+include("../config/functions.php"); // ← IMEONGEZWA
 
 $user_id = $_SESSION['user_id'];
 
@@ -38,6 +39,16 @@ $pending = $data['pending'] ?? 0;
 $approved = $data['approved'] ?? 0;
 $rejected = $data['rejected'] ?? 0;
 $implemented = $data['implemented'] ?? 0;
+
+// =====================
+// REKODI DASHBOARD VIEW (OPTIONAL - INAWEZA KUONDOKA IKIWA INAZIDI LOGS)
+// =====================
+// logActivity(
+//     $_SESSION['user_id'],
+//     $_SESSION['full_name'],
+//     'Dashboard Viewed',
+//     'User viewed suggester dashboard'
+// );
 ?>
 
 <!DOCTYPE html>
@@ -58,7 +69,7 @@ body{
     margin-left:250px;
     padding:30px;
     padding-top:100px;
-    min-height:calc(100vh - 250px);
+    min-height:calc(100vh - 180px);
 }
 
 .stats{
